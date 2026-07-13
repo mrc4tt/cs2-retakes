@@ -37,7 +37,18 @@ public class SpawnManager
 
         foreach (var spawn in _mapConfigService.GetSpawnsClone())
         {
-            _spawns[spawn.Bombsite][spawn.Team].Add(spawn);
+            // Reconstruct the Spawn in this assembly-load context. On a CSS hot-reload the
+            // plugin dll can be present in two load contexts, giving two distinct Spawn types;
+            // adding a foreign-context Spawn to a local List<Spawn> throws ArrayTypeMismatchException.
+            // Rebuilding here anchors the stored object to the same context as _spawns.
+            var localSpawn = new Spawn(spawn.Vector, spawn.QAngle)
+            {
+                Team = spawn.Team,
+                Bombsite = spawn.Bombsite,
+                CanBePlanter = spawn.CanBePlanter
+            };
+
+            _spawns[localSpawn.Bombsite][localSpawn.Team].Add(localSpawn);
         }
 
         Logger.LogInfo("SpawnManager", "Map spawns calculated successfully");
