@@ -44,6 +44,11 @@ If you appreciate the project then please take the time to star the repository ð
 4. Start the server and wait for the config.json file to be generated in `addons/counterstrikesharp/configs/plugins/RetakesPlugin`.
 5. Complete the configuration file with the parameters of your choice.
 
+## Map configs (spawns)
+The release ships spawns for the common maps in `addons/counterstrikesharp/plugins/RetakesPlugin/map_config/`.
+Spawns you add or remove in game are saved to `addons/counterstrikesharp/configs/plugins/RetakesPlugin/map_config/<map>.json`.
+A file there overrides the shipped file for that map and is never touched by plugin updates. Delete it to go back to the shipped spawns.
+
 ## Recommendations
 I also recommend installing these plugins for an improved player experience
 - Instadefuse: https://github.com/B3none/cs2-instadefuse

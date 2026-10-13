@@ -32,31 +32,19 @@ public class MapConfigsCommand
             return;
         }
 
-        var mapConfigDirectory = Path.Combine(_moduleDirectory, "map_config");
+        var mapConfigs = MapConfigPaths.List(_moduleDirectory);
 
-        if (!Directory.Exists(mapConfigDirectory))
+        if (mapConfigs.Count == 0)
         {
             commandInfo.ReplyToCommand($"{_plugin.Localizer["retakes.prefix"]} No map configs found.");
             return;
         }
 
-        var files = Directory.GetFiles(mapConfigDirectory);
-        Array.Sort(files);
-
-        if (files.Length == 0)
+        foreach (var (name, isCustom) in mapConfigs)
         {
-            commandInfo.ReplyToCommand($"{_plugin.Localizer["retakes.prefix"]} No map configs found.");
-            return;
-        }
-
-        foreach (var file in files)
-        {
-            var transformedFile = file
-                .Replace($"{mapConfigDirectory}/", "")
-                .Replace(".json", "");
-
-            commandInfo.ReplyToCommand($"{_plugin.Localizer["retakes.prefix"]} !mapconfig {transformedFile}");
-            player?.PrintToConsole($"{_plugin.Localizer["retakes.prefix"]} !mapconfig {transformedFile}");
+            var line = $"{_plugin.Localizer["retakes.prefix"]} !mapconfig {name}{(isCustom ? " (custom)" : "")}";
+            commandInfo.ReplyToCommand(line);
+            player?.PrintToConsole(line);
         }
 
         commandInfo.ReplyToCommand($"{_plugin.Localizer["retakes.prefix"]} A list of available map configs has been outputted above.");

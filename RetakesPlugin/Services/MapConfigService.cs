@@ -8,37 +8,39 @@ namespace RetakesPlugin.Services;
 public class MapConfigService
 {
     private readonly string _mapName;
-    private readonly string _mapConfigDirectory;
-    private readonly string _mapConfigPath;
+    private readonly string _moduleDirectory;
+    // Edits always go to the custom file in configs/, see MapConfigPaths.
+    private readonly string _customConfigPath;
     private MapConfigData? _mapConfigData;
     private readonly JsonSerializerOptions _jsonOptions;
 
     public MapConfigService(string moduleDirectory, string mapName, JsonSerializerOptions jsonOptions)
     {
         _mapName = mapName;
-        _mapConfigDirectory = Path.Combine(moduleDirectory, "map_config");
-        _mapConfigPath = Path.Combine(_mapConfigDirectory, $"{mapName}.json");
+        _moduleDirectory = moduleDirectory;
+        _customConfigPath = MapConfigPaths.CustomPath(moduleDirectory, mapName);
         _mapConfigData = null;
         _jsonOptions = jsonOptions;
     }
 
     public void Load(bool isViaCommand = false)
     {
-        Logger.LogDebug("MapConfig", $"Attempting to load map data from {_mapConfigPath}");
+        var mapConfigPath = MapConfigPaths.ResolveReadPath(_moduleDirectory, _mapName);
+        Logger.LogDebug("MapConfig", $"Attempting to load map data from {mapConfigPath}");
 
         _mapConfigData = null;
 
         try
         {
-            if (!File.Exists(_mapConfigPath))
+            if (!File.Exists(mapConfigPath))
             {
                 throw new FileNotFoundException();
             }
 
-            var jsonData = File.ReadAllText(_mapConfigPath);
+            var jsonData = File.ReadAllText(mapConfigPath);
             _mapConfigData = JsonSerializer.Deserialize<MapConfigData>(jsonData, _jsonOptions);
 
-            Logger.LogInfo("MapConfig", $"Map config loaded for {_mapName}");
+            Logger.LogInfo("MapConfig", $"Map config loaded for {_mapName} from {mapConfigPath}");
         }
         catch (FileNotFoundException)
         {
@@ -46,8 +48,9 @@ public class MapConfigService
 
             if (!isViaCommand)
             {
+                // Start empty in memory only. Writing an empty custom file here would hide spawns a
+                // later release ships for this map; the file is created once a spawn is added.
                 _mapConfigData = new MapConfigData();
-                Save();
             }
         }
         catch (Exception ex)
@@ -125,13 +128,10 @@ public class MapConfigService
 
         try
         {
-            if (!Directory.Exists(_mapConfigDirectory))
-            {
-                Directory.CreateDirectory(_mapConfigDirectory);
-            }
+            Directory.CreateDirectory(Path.GetDirectoryName(_customConfigPath)!);
 
-            File.WriteAllText(_mapConfigPath, jsonString);
-            Logger.LogDebug("MapConfig", $"Data written to {_mapConfigPath}");
+            File.WriteAllText(_customConfigPath, jsonString);
+            Logger.LogDebug("MapConfig", $"Data written to {_customConfigPath}");
         }
         catch (IOException e)
         {

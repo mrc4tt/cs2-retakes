@@ -40,18 +40,10 @@ public class MapConfigCommand
             return;
         }
 
-        var mapConfigDirectory = Path.Combine(_moduleDirectory, "map_config");
-
-        if (!Directory.Exists(mapConfigDirectory))
-        {
-            commandInfo.ReplyToCommand($"{_plugin.Localizer["retakes.prefix"]} No map configs found.");
-            return;
-        }
-
         var mapConfigFileName = commandInfo.GetArg(1).Trim().Replace(".json", "");
-        var mapConfigFilePath = Path.Combine(mapConfigDirectory, $"{mapConfigFileName}.json");
 
-        if (!File.Exists(mapConfigFilePath))
+        if (mapConfigFileName.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0 ||
+            !MapConfigPaths.Exists(_moduleDirectory, mapConfigFileName))
         {
             commandInfo.ReplyToCommand($"{_plugin.Localizer["retakes.prefix"]} Map config file not found.");
             return;
