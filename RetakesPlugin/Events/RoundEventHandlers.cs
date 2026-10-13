@@ -26,7 +26,10 @@ public class RoundEventHandlers
     private ShowSpawnsCommand? _showSpawnsCommand;
 
     private Bombsite _currentBombsite = Bombsite.A;
-    private CCSPlayerController? _planter;
+    // The planter is remembered by UserId across the round: the controller it came from can be
+    // freed by a disconnect between round start and freeze end, and reading IsValid through that
+    // pointer is exactly the dereference this is meant to avoid.
+    private int? _planterUserId;
     private CsTeam _lastRoundWinner = CsTeam.None;
     private Bombsite? _forcedBombsite;
 
@@ -58,6 +61,9 @@ public class RoundEventHandlers
 
     public HookResult OnRoundPreStart(EventRoundPrestart @event, GameEventInfo info)
     {
+        // The previous round's termination has landed; allow the next one to be requested.
+        GameRulesHelper.ClearRoundEndPending();
+
         var gameRules = GameRulesHelper.GetGameRulesOrNull();
         if (gameRules == null)
         {
@@ -87,12 +93,22 @@ public class RoundEventHandlers
 
     public HookResult OnRoundStart(EventRoundStart @event, GameEventInfo info)
     {
-        // Handle weird alive spectators bug
-        var weirdAliveSpectators = Utilities.GetPlayers().Where(x => x is { TeamNum: < (int)CsTeam.Terrorist, PawnIsAlive: true });
-        foreach (var weirdAliveSpectator in weirdAliveSpectators)
+        // Handle weird alive spectators bug. GetPlayers() includes HLTV proxies and controllers
+        // that are still connecting, and the list has to be materialised before suiciding anyone:
+        // the lazy query was being walked while CommitSuicide mutated the very state it filters on.
+        var weirdAliveSpectators = Utilities.GetPlayers()
+            .Where(player => PlayerHelper.IsValid(player) && !player.IsHLTV)
+            .Where(player => player.TeamNum < (int)CsTeam.Terrorist && player.PawnIsAlive)
+            .ToList();
+
+        if (weirdAliveSpectators.Count > 0)
         {
             Server.ExecuteCommand("mp_autoteambalance 0");
-            weirdAliveSpectator.CommitSuicide(false, true);
+
+            foreach (var weirdAliveSpectator in weirdAliveSpectators)
+            {
+                weirdAliveSpectator.CommitSuicide(false, true);
+            }
         }
 
         var gameRules = GameRulesHelper.GetGameRulesOrNull();
@@ -130,7 +146,8 @@ public class RoundEventHandlers
         _currentBombsite = _forcedBombsite ?? (_random.Next(0, 2) == 0 ? Bombsite.A : Bombsite.B);
         _gameManager.ResetPlayerScores();
 
-        _planter = _spawnManager.HandleRoundSpawns(_currentBombsite, _gameManager.QueueManager.ActivePlayers);
+        var planter = _spawnManager.HandleRoundSpawns(_currentBombsite, _gameManager.QueueManager.ActivePlayers);
+        _planterUserId = PlayerHelper.TryGetUserId(planter, out var planterUserId) ? planterUserId : null;
 
         if (_enableFallbackBombsiteAnnouncement)
         {
@@ -160,17 +177,15 @@ public class RoundEventHandlers
 
         Logger.LogDebug("Round", $"EnableFallbackAllocation: {_enableFallbackAllocation}");
 
-        foreach (var player in _gameManager.QueueManager.ActivePlayers.Where(PlayerHelper.IsValid))
+        foreach (var player in _gameManager.QueueManager.ActivePlayers)
         {
-            if (!PlayerHelper.IsValid(player))
-            {
-                continue;
-            }
-
             PlayerHelper.RemoveHelmetAndHeavyArmour(player);
             player.RemoveWeapons();
 
-            if (player == _planter && !_isAutoPlantEnabled)
+            if (!_isAutoPlantEnabled
+                && _planterUserId.HasValue
+                && PlayerHelper.TryGetUserId(player, out var userId)
+                && userId == _planterUserId.Value)
             {
                 PlayerHelper.GiveAndSwitchToBomb(player);
             }
@@ -254,9 +269,11 @@ public class RoundEventHandlers
             return;
         }
 
-        if (_planter != null && PlayerHelper.IsValid(_planter))
+        var planter = _planterUserId.HasValue ? PlayerHelper.ResolveConnected(_planterUserId.Value) : null;
+
+        if (planter != null)
         {
-            BombService.PlantTickingBomb(_planter, _currentBombsite);
+            BombService.PlantTickingBomb(planter, _currentBombsite);
             Logger.LogInfo("Round", $"Auto-planted bomb at {_currentBombsite}");
         }
         else

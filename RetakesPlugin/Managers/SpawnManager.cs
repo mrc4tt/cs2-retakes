@@ -71,7 +71,7 @@ public class SpawnManager
         return _spawns[bombsite][(CsTeam)team];
     }
 
-    public CCSPlayerController? HandleRoundSpawns(Bombsite bombsite, HashSet<CCSPlayerController> players)
+    public CCSPlayerController? HandleRoundSpawns(Bombsite bombsite, List<CCSPlayerController> players)
     {
         Logger.LogDebug("SpawnManager", $"Handling round spawns for bombsite {bombsite}");
 
@@ -111,6 +111,14 @@ public class SpawnManager
                 continue;
             }
 
+            // Resolve the pawn once, up front. The teleport below used `player.Pawn.Value!` and
+            // would have dereferenced a pawn that had gone away between the check and the call.
+            var playerPawn = player.Pawn.Value;
+            if (playerPawn == null || !playerPawn.IsValid)
+            {
+                continue;
+            }
+
             var team = player.Team;
             if (team != CsTeam.Terrorist && team != CsTeam.CounterTerrorist)
             {
@@ -130,7 +138,7 @@ public class SpawnManager
 
             var spawn = player == planter ? randomPlanterSpawn : spawns[team][_random.Next(count)];
 
-            player.Pawn.Value!.Teleport(spawn.Vector, spawn.QAngle, new Vector());
+            playerPawn.Teleport(spawn.Vector, spawn.QAngle, new Vector());
             spawns[team].Remove(spawn);
         }
 

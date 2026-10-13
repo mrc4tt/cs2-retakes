@@ -16,8 +16,20 @@ public class QueueManager
     private readonly bool _shouldForceEvenTeamsWhenPlayerCountIsMultipleOf10;
     private readonly bool _shouldPreventTeamChangesMidRound;
 
-    public HashSet<CCSPlayerController> QueuePlayers = [];
-    public HashSet<CCSPlayerController> ActivePlayers = [];
+    // Players are tracked by UserId, never by CCSPlayerController.
+    //
+    // CounterStrikeSharp's CEntityInstance compares with Equals(EntityHandle) but hashes with
+    // Handle.GetHashCode() - the raw pointer. A HashSet<CCSPlayerController> therefore buckets
+    // entries by pointer, so once a controller is freed on disconnect its entry can no longer be
+    // found from a freshly resolved wrapper: Remove() silently misses, the stale entry survives,
+    // the active count stays inflated (wrong T/CT ratio, missed restart-when-empty), and the next
+    // ChangeTeam / CommitSuicide / PrintToChat on that entry touches freed memory and takes the
+    // server down. UserIds are plain ints with value semantics; every use re-resolves a live
+    // controller, and a player who has gone simply resolves to null and is pruned.
+    private readonly HashSet<int> _activePlayerIds = [];
+    private readonly HashSet<int> _queuePlayerIds = [];
+    private readonly HashSet<int> _roundTerroristIds = [];
+    private readonly HashSet<int> _roundCounterTerroristIds = [];
 
     public QueueManager(RetakesPlugin plugin, int? retakesMaxPlayers, float? retakesTerroristRatio, List<QueuePriorityFlagConfig>? queuePriorityFlags, List<QueuePriorityFlagConfig>? queueImmunityFlags, bool? shouldForceEvenTeamsWhenPlayerCountIsMultipleOf10, bool? shouldPreventTeamChangesMidRound)
     {
@@ -34,10 +46,81 @@ public class QueueManager
         Logger.LogInfo("QueueManager", $"Queue manager initialized (Max: {_maxRetakesPlayers}, T Ratio: {_terroristRatio})");
     }
 
+    #region Identity
+
+    // Resolves each tracked UserId to a live controller, dropping the ones that no longer
+    // resolve. Every read of the queues goes through here, so stale ids can never reach a
+    // caller: the pruning is the point, not a side effect.
+    private List<CCSPlayerController> ResolvePlayers(HashSet<int> userIds)
+    {
+        if (userIds.Count == 0)
+        {
+            return [];
+        }
+
+        List<CCSPlayerController> players = [];
+        List<int>? staleUserIds = null;
+
+        foreach (var userId in userIds)
+        {
+            var player = PlayerHelper.ResolveConnected(userId);
+
+            if (player == null)
+            {
+                (staleUserIds ??= []).Add(userId);
+                continue;
+            }
+
+            players.Add(player);
+        }
+
+        if (staleUserIds != null)
+        {
+            foreach (var staleUserId in staleUserIds)
+            {
+                Forget(staleUserId);
+            }
+        }
+
+        return players;
+    }
+
+    private void Forget(int userId)
+    {
+        _activePlayerIds.Remove(userId);
+        _queuePlayerIds.Remove(userId);
+        _roundTerroristIds.Remove(userId);
+        _roundCounterTerroristIds.Remove(userId);
+    }
+
+    public List<CCSPlayerController> ActivePlayers => ResolvePlayers(_activePlayerIds);
+    public List<CCSPlayerController> QueuePlayers => ResolvePlayers(_queuePlayerIds);
+
+    public int ActivePlayerCount => ResolvePlayers(_activePlayerIds).Count;
+    public int QueuePlayerCount => ResolvePlayers(_queuePlayerIds).Count;
+
+    public bool IsActive(CCSPlayerController? player) =>
+        PlayerHelper.TryGetUserId(player, out var userId) && _activePlayerIds.Contains(userId);
+
+    public bool IsQueued(CCSPlayerController? player) =>
+        PlayerHelper.TryGetUserId(player, out var userId) && _queuePlayerIds.Contains(userId);
+
+    public void AddActivePlayer(CCSPlayerController? player)
+    {
+        if (PlayerHelper.TryGetUserId(player, out var userId))
+        {
+            _activePlayerIds.Add(userId);
+        }
+    }
+
+    #endregion
+
     public int GetTargetNumTerrorists()
     {
-        var shouldForceEvenTeams = _shouldForceEvenTeamsWhenPlayerCountIsMultipleOf10 && ActivePlayers.Count % 10 == 0;
-        var ratio = (shouldForceEvenTeams ? 0.5 : _terroristRatio) * ActivePlayers.Count;
+        var activePlayerCount = ActivePlayerCount;
+
+        var shouldForceEvenTeams = _shouldForceEvenTeamsWhenPlayerCountIsMultipleOf10 && activePlayerCount % 10 == 0;
+        var ratio = (shouldForceEvenTeams ? 0.5 : _terroristRatio) * activePlayerCount;
         var numTerrorists = (int)Math.Round(ratio);
 
         return numTerrorists > 0 ? numTerrorists : 1;
@@ -45,19 +128,24 @@ public class QueueManager
 
     public int GetTargetNumCounterTerrorists()
     {
-        return ActivePlayers.Count - GetTargetNumTerrorists();
+        return ActivePlayerCount - GetTargetNumTerrorists();
     }
 
     public HookResult PlayerJoinedTeam(CCSPlayerController player, CsTeam fromTeam, CsTeam toTeam)
     {
         Logger.LogDebug("QueueManager", $"[{player.PlayerName}] Team change: {fromTeam} -> {toTeam}");
 
+        if (!PlayerHelper.TryGetUserId(player, out var userId))
+        {
+            return HookResult.Continue;
+        }
+
         if (fromTeam == CsTeam.None && toTeam == CsTeam.Spectator)
         {
             return HookResult.Continue;
         }
 
-        if (ActivePlayers.Contains(player))
+        if (_activePlayerIds.Contains(userId))
         {
             Logger.LogDebug("QueueManager", $"[{player.PlayerName}] Player is active");
 
@@ -76,24 +164,24 @@ public class QueueManager
             }
 
             if (
-                _roundTerrorists.Count > 0
-                && _roundCounterTerrorists.Count > 0
+                _roundTerroristIds.Count > 0
+                && _roundCounterTerroristIds.Count > 0
                 && (
-                    (toTeam == CsTeam.CounterTerrorist && !_roundCounterTerrorists.Contains(player))
-                    || (toTeam == CsTeam.Terrorist && !_roundTerrorists.Contains(player))
+                    (toTeam == CsTeam.CounterTerrorist && !_roundCounterTerroristIds.Contains(userId))
+                    || (toTeam == CsTeam.Terrorist && !_roundTerroristIds.Contains(userId))
                 )
             )
             {
                 Logger.LogInfo("QueueManager", $"[{player.PlayerName}] Prevented mid-round team change");
-                ActivePlayers.Remove(player);
-                QueuePlayers.Add(player);
+                _activePlayerIds.Remove(userId);
+                _queuePlayerIds.Add(userId);
 
                 if (player.PawnIsAlive)
                 {
                     player.CommitSuicide(false, true);
                 }
 
-                player.ChangeTeam(CsTeam.Spectator);
+                PlayerHelper.TryChangeTeam(player, CsTeam.Spectator);
                 return HookResult.Handled;
             }
 
@@ -101,57 +189,63 @@ public class QueueManager
             return HookResult.Handled;
         }
 
-        if (!QueuePlayers.Contains(player))
+        if (!_queuePlayerIds.Contains(userId))
         {
+            // Players explicitly choosing to spectate should not be tracked as wanting to play.
+            // Without this, jointeam 1 while already spectating adds the player to the queue,
+            // and the next queue update yanks them into a team mid-restart.
+            if (toTeam != CsTeam.Terrorist && toTeam != CsTeam.CounterTerrorist)
+            {
+                return HookResult.Continue;
+            }
+
             var gameRules = GameRulesHelper.GetGameRulesOrNull();
-            if ((gameRules?.WarmupPeriod ?? false) && ActivePlayers.Count < _maxRetakesPlayers)
+            if ((gameRules?.WarmupPeriod ?? false) && ActivePlayerCount < _maxRetakesPlayers)
             {
                 Logger.LogInfo("QueueManager", $"[{player.PlayerName}] Added to active players (warmup)");
-                ActivePlayers.Add(player);
+                _activePlayerIds.Add(userId);
                 return HookResult.Continue;
             }
 
             Logger.LogInfo("QueueManager", $"[{player.PlayerName}] Added to queue");
             player.PrintToChat($"{_plugin.Localizer["retakes.prefix"]} {_plugin.Localizer["retakes.queue.joined"]}");
-            QueuePlayers.Add(player);
+            _queuePlayerIds.Add(userId);
         }
 
         GameRulesHelper.CheckRoundDone();
         return HookResult.Handled;
     }
 
-    private void RemoveDisconnectedPlayers()
+    private void PruneDisconnectedPlayers()
     {
-        var disconnectedActivePlayers = ActivePlayers
-            .Where(player => !PlayerHelper.IsValid(player) || !PlayerHelper.IsConnected(player))
-            .ToList();
+        var activeCountBefore = _activePlayerIds.Count;
+        var queueCountBefore = _queuePlayerIds.Count;
 
-        if (disconnectedActivePlayers.Count > 0)
+        // Resolving is what prunes; the lists themselves are not needed here.
+        ResolvePlayers(_activePlayerIds);
+        ResolvePlayers(_queuePlayerIds);
+
+        var removedActive = activeCountBefore - _activePlayerIds.Count;
+        if (removedActive > 0)
         {
-            Logger.LogDebug("QueueManager", $"Removing {disconnectedActivePlayers.Count} disconnected active players");
-            ActivePlayers.RemoveWhere(disconnectedActivePlayers.Contains);
+            Logger.LogDebug("QueueManager", $"Removing {removedActive} disconnected active players");
         }
 
-        var disconnectedQueuePlayers = QueuePlayers
-            .Where(player => !PlayerHelper.IsValid(player) || !PlayerHelper.IsConnected(player))
-            .ToList();
-
-        if (disconnectedQueuePlayers.Count > 0)
+        var removedQueue = queueCountBefore - _queuePlayerIds.Count;
+        if (removedQueue > 0)
         {
-            Logger.LogDebug("QueueManager", $"Removing {disconnectedQueuePlayers.Count} disconnected queue players");
-            QueuePlayers.RemoveWhere(disconnectedQueuePlayers.Contains);
+            Logger.LogDebug("QueueManager", $"Removing {removedQueue} disconnected queue players");
         }
     }
 
     private void HandleQueuePriority()
     {
-        if (ActivePlayers.Count != _maxRetakesPlayers)
+        if (ActivePlayerCount != _maxRetakesPlayers)
         {
             return;
         }
 
         var queuePlayersWithPriority = QueuePlayers
-            .Where(PlayerHelper.IsValid)
             .Select(player => new
             {
                 Player = player,
@@ -172,13 +266,14 @@ public class QueueManager
             var queuePlayer = queuePlayerData.Player;
             var queuePlayerPriority = queuePlayerData.Priority;
 
-            if (!PlayerHelper.IsValid(queuePlayer))
+            // The swap below changes the queues, so re-resolve on every iteration rather than
+            // reusing controllers captured before the previous swap.
+            if (!PlayerHelper.TryGetUserId(queuePlayer, out var queueUserId) || !_queuePlayerIds.Contains(queueUserId))
             {
                 continue;
             }
 
             var replaceablePlayers = ActivePlayers
-                .Where(PlayerHelper.IsValid)
                 .Select(player => new
                 {
                     Player = player,
@@ -201,16 +296,28 @@ public class QueueManager
             var replaceablePlayerData = replaceablePlayers.First();
             var replaceablePlayer = replaceablePlayerData.Player;
 
+            if (!PlayerHelper.TryGetUserId(replaceablePlayer, out var replaceableUserId))
+            {
+                continue;
+            }
+
             var queuePlayerDisplayName = PlayerHelper.GetQueuePriorityDisplayName(queuePlayer, _queuePriorityFlags);
 
-            replaceablePlayer.ChangeTeam(CsTeam.Spectator);
-            ActivePlayers.Remove(replaceablePlayer);
-            QueuePlayers.Add(replaceablePlayer);
+            // Move the queued player into the game first; if that fails there is no free
+            // seat and nobody should be displaced to spectator.
+            if (!PlayerHelper.TryChangeTeam(queuePlayer, CsTeam.CounterTerrorist))
+            {
+                Logger.LogWarning("QueueManager", $"Could not move {queuePlayer.PlayerName} to CT, skipping queue priority swap");
+                continue;
+            }
+
+            PlayerHelper.TryChangeTeam(replaceablePlayer, CsTeam.Spectator);
+            _activePlayerIds.Remove(replaceableUserId);
+            _queuePlayerIds.Add(replaceableUserId);
             replaceablePlayer.PrintToChat($"{_plugin.Localizer["retakes.prefix"]} {_plugin.Localizer["retakes.queue.replaced_by_vip", queuePlayer.PlayerName, queuePlayerDisplayName]}");
 
-            ActivePlayers.Add(queuePlayer);
-            QueuePlayers.Remove(queuePlayer);
-            queuePlayer.ChangeTeam(CsTeam.CounterTerrorist);
+            _activePlayerIds.Add(queueUserId);
+            _queuePlayerIds.Remove(queueUserId);
             queuePlayer.PrintToChat($"{_plugin.Localizer["retakes.prefix"]} {_plugin.Localizer["retakes.queue.vip_took_place", replaceablePlayer.PlayerName, queuePlayerDisplayName]}");
 
             Logger.LogInfo("QueueManager", $"{queuePlayer.PlayerName} ({queuePlayerDisplayName}, priority: {queuePlayerPriority}) replaced {replaceablePlayer.PlayerName} (priority: {replaceablePlayerData.Priority})");
@@ -219,15 +326,15 @@ public class QueueManager
 
     public void Update()
     {
-        RemoveDisconnectedPlayers();
+        PruneDisconnectedPlayers();
 
-        Logger.LogDebug("QueueManager", $"Update: Max={_maxRetakesPlayers}, Active={ActivePlayers.Count}, Queue={QueuePlayers.Count}");
+        var activePlayerCount = ActivePlayerCount;
+        Logger.LogDebug("QueueManager", $"Update: Max={_maxRetakesPlayers}, Active={activePlayerCount}, Queue={_queuePlayerIds.Count}");
 
-        var playersToAdd = _maxRetakesPlayers - ActivePlayers.Count;
-        if (playersToAdd > 0 && QueuePlayers.Count > 0)
+        var playersToAdd = _maxRetakesPlayers - activePlayerCount;
+        if (playersToAdd > 0 && _queuePlayerIds.Count > 0)
         {
             var playersToAddList = QueuePlayers
-                .Where(PlayerHelper.IsValid)
                 .Select(player => new
                 {
                     Player = player,
@@ -239,46 +346,56 @@ public class QueueManager
                 .Select(x => x.Player)
                 .ToList();
 
-            QueuePlayers.RemoveWhere(playersToAddList.Contains);
-
             foreach (var player in playersToAddList)
             {
-                if (!PlayerHelper.IsValid(player))
+                if (!PlayerHelper.TryGetUserId(player, out var userId))
                 {
                     continue;
                 }
 
-                ActivePlayers.Add(player);
-                player.ChangeTeam(CsTeam.CounterTerrorist);
+                _queuePlayerIds.Remove(userId);
+
+                // Only mark the player active once the team change actually succeeded;
+                // a failed ChangeTeam (disconnected pawn, mid-restart) must not leave a
+                // spectator counted as an active player.
+                if (!PlayerHelper.TryChangeTeam(player, CsTeam.CounterTerrorist))
+                {
+                    Logger.LogWarning("QueueManager", $"Could not move {player.PlayerName} from queue to active, skipping");
+                    continue;
+                }
+
+                _activePlayerIds.Add(userId);
                 Logger.LogInfo("QueueManager", $"Moved {player.PlayerName} from queue to active");
             }
         }
 
         HandleQueuePriority();
 
-        if (ActivePlayers.Count == _maxRetakesPlayers && QueuePlayers.Count > 0)
+        activePlayerCount = ActivePlayerCount;
+        if (activePlayerCount == _maxRetakesPlayers && _queuePlayerIds.Count > 0)
         {
-            var waitingMessage = _plugin.Localizer["retakes.queue.waiting", ActivePlayers.Count];
+            var waitingMessage = _plugin.Localizer["retakes.queue.waiting", activePlayerCount];
             foreach (var player in QueuePlayers)
             {
-                if (!PlayerHelper.IsValid(player))
-                {
-                    continue;
-                }
-
                 player.PrintToChat($"{_plugin.Localizer["retakes.prefix"]} {waitingMessage}");
             }
         }
     }
 
-    public void RemovePlayerFromQueues(CCSPlayerController player)
+    public void RemovePlayerFromQueues(CCSPlayerController? player)
     {
-        ActivePlayers.Remove(player);
-        QueuePlayers.Remove(player);
-        _roundTerrorists.Remove(player);
-        _roundCounterTerrorists.Remove(player);
+        if (!PlayerHelper.TryGetUserId(player, out var userId))
+        {
+            // The controller is already gone, so there is no id to look up. Drop whatever no
+            // longer resolves instead of leaving the entry behind.
+            PruneDisconnectedPlayers();
+            GameRulesHelper.CheckRoundDone();
+            return;
+        }
 
-        Logger.LogDebug("QueueManager", $"Removed {player.PlayerName} from all queues");
+        Forget(userId);
+
+        Logger.LogDebug("QueueManager", $"Removed {player!.PlayerName} from all queues");
         GameRulesHelper.CheckRoundDone();
     }
 
@@ -286,34 +403,31 @@ public class QueueManager
     {
         var prefix = isBefore ? "BEFORE" : "AFTER";
 
-        if (!ActivePlayers.Any())
+        var activePlayers = ActivePlayers;
+        if (activePlayers.Count == 0)
         {
             Logger.LogDebug("QueueManager", $"ActivePlayers ({prefix}): Empty");
         }
         else
         {
-            var names = string.Join(", ", ActivePlayers.Where(PlayerHelper.IsValid).Select(p => p.PlayerName));
-            Logger.LogDebug("QueueManager", $"ActivePlayers ({prefix}): {names}");
+            Logger.LogDebug("QueueManager", $"ActivePlayers ({prefix}): {string.Join(", ", activePlayers.Select(p => p.PlayerName))}");
         }
 
-        if (!QueuePlayers.Any())
+        var queuePlayers = QueuePlayers;
+        if (queuePlayers.Count == 0)
         {
             Logger.LogDebug("QueueManager", $"QueuePlayers ({prefix}): Empty");
         }
         else
         {
-            var names = string.Join(", ", QueuePlayers.Where(PlayerHelper.IsValid).Select(p => p.PlayerName));
-            Logger.LogDebug("QueueManager", $"QueuePlayers ({prefix}): {names}");
+            Logger.LogDebug("QueueManager", $"QueuePlayers ({prefix}): {string.Join(", ", queuePlayers.Select(p => p.PlayerName))}");
         }
     }
 
-    private List<CCSPlayerController> _roundTerrorists = [];
-    private List<CCSPlayerController> _roundCounterTerrorists = [];
-
     public void ClearRoundTeams()
     {
-        _roundTerrorists.Clear();
-        _roundCounterTerrorists.Clear();
+        _roundTerroristIds.Clear();
+        _roundCounterTerroristIds.Clear();
         Logger.LogDebug("QueueManager", "Round teams cleared");
     }
 
@@ -324,14 +438,28 @@ public class QueueManager
             return;
         }
 
-        _roundTerrorists = ActivePlayers
-            .Where(player => PlayerHelper.IsValid(player) && player.Team == CsTeam.Terrorist)
-            .ToList();
+        _roundTerroristIds.Clear();
+        _roundCounterTerroristIds.Clear();
 
-        _roundCounterTerrorists = ActivePlayers
-            .Where(player => PlayerHelper.IsValid(player) && player.Team == CsTeam.CounterTerrorist)
-            .ToList();
+        foreach (var player in ActivePlayers)
+        {
+            if (!PlayerHelper.TryGetUserId(player, out var userId))
+            {
+                continue;
+            }
 
-        Logger.LogDebug("QueueManager", $"Round teams set: {_roundTerrorists.Count} T, {_roundCounterTerrorists.Count} CT");
+            switch (player.Team)
+            {
+                case CsTeam.Terrorist:
+                    _roundTerroristIds.Add(userId);
+                    break;
+
+                case CsTeam.CounterTerrorist:
+                    _roundCounterTerroristIds.Add(userId);
+                    break;
+            }
+        }
+
+        Logger.LogDebug("QueueManager", $"Round teams set: {_roundTerroristIds.Count} T, {_roundCounterTerroristIds.Count} CT");
     }
 }

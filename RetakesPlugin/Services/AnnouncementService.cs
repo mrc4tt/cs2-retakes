@@ -10,7 +10,7 @@ public class AnnouncementService
 {
     private readonly RetakesPlugin _plugin;
     private readonly Random _random;
-    private readonly HashSet<CCSPlayerController> _hasMutedVoices;
+    private readonly HashSet<int> _hasMutedVoices;
     private readonly bool _voicesEnabled;
     private readonly bool _centerEnabled;
 
@@ -25,7 +25,7 @@ public class AnnouncementService
         "swat_fem"
     ];
 
-    public AnnouncementService(RetakesPlugin plugin, Random random, HashSet<CCSPlayerController> hasMutedVoices, bool voicesEnabled, bool centerEnabled)
+    public AnnouncementService(RetakesPlugin plugin, Random random, HashSet<int> hasMutedVoices, bool voicesEnabled, bool centerEnabled)
     {
         _plugin = plugin;
         _random = random;
@@ -42,13 +42,26 @@ public class AnnouncementService
         var announcementMessage = _plugin.Localizer["retakes.bombsite.announcement", bombsite.ToString(), numTerrorist, numCounterTerrorist];
         var centerAnnouncementMessage = _plugin.Localizer["retakes.center.bombsite.announcement", bombsite.ToString(), numTerrorist, numCounterTerrorist];
 
-        foreach (var player in Utilities.GetPlayers())
+        // GetPlayers() also hands back bots, HLTV proxies and half-connected controllers;
+        // PrintToChat / ExecuteClientCommand on those has no receiver and can touch a pawn that
+        // is not there yet.
+        var recipients = Utilities.GetPlayers()
+            .Where(player => PlayerHelper.IsValid(player) && PlayerHelper.IsConnected(player))
+            .Where(player => !player.IsBot && !player.IsHLTV)
+            .ToList();
+
+        foreach (var player in recipients)
         {
+            if (!PlayerHelper.TryGetUserId(player, out var userId))
+            {
+                continue;
+            }
+
             if (!onlyCenter)
             {
                 player.PrintToChat($"{_plugin.Localizer["retakes.prefix"]} {announcementMessage}");
 
-                if (_voicesEnabled && !_hasMutedVoices.Contains(player))
+                if (_voicesEnabled && !_hasMutedVoices.Contains(userId))
                 {
                     var bombsiteAnnouncer = BombsiteAnnouncers[_random.Next(BombsiteAnnouncers.Length)];
                     player.ExecuteClientCommand($"play sounds/vo/agents/{bombsiteAnnouncer}/loc_{bombsite.ToString().ToLower()}_01");

@@ -4,3 +4,11 @@
 /RetakesPluginShared/.idea
 *.DotSettings.user
 *.sln
+# Local
+hm
+.claude/
+build-output*/
+bin/
+obj/
+.css/
+dist/

@@ -53,7 +53,9 @@ Although this plugin comes with it's own weapon allocation system, I would recom
 If you'd like to add your own allocator here, make a PR to add it :+1:
 
 ## Configuration
-When the plugin is first loaded it will create a `retakes_config.json` file in the plugin directory. This file contains all of the configuration options for the plugin:
+When the plugin is first loaded it will create `addons/counterstrikesharp/configs/plugins/RetakesPlugin/RetakesPlugin.json`. This is the standard CounterStrikeSharp config location — the directory name comes from the plugin's own folder name, so if you rename the plugin folder the config folder name follows it. The file contains all of the configuration options for the plugin:
+
+> Older versions kept a `retakes_config.json` inside the plugin directory. That file is no longer read — delete it and use the path above.
 
 ### GameSettings
 | Config                    | Description                                                                                                                             | Default | Min   | Max   |
@@ -61,7 +63,7 @@ When the plugin is first loaded it will create a `retakes_config.json` file in t
 | MaxPlayers                | The maximum number of players allowed in the game at any time. (If you want to increase the max capability you need to add more spawns) | 9       | 2     | 10    |
 | ShouldBreakBreakables     | Whether to break all breakable props on round start (People are noticing rare crashes when this is enabled).                            | false   | false | true  |
 | ShouldOpenDoors           | Whether to open doors on round start (People are noticing rare crashes when this is enabled).                                           | false   | false | true  |
-| EnableFallbackAllocation  | Whether to enable the fallback weapon allocation. You should set this value to false if you're using a standalone weapon allocator.     | true    | false | true  |
+| EnableFallbackAllocation  | Whether to enable the fallback weapon allocation. Leave this false if you're using a standalone weapon allocator; set it to true only if you want this plugin to allocate weapons itself. | false   | false | true  |
 
 ### QueueSettings
 | Config                 | Description                                                                                                   | Default  | Min | Max |

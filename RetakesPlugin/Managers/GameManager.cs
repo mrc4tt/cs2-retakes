@@ -33,6 +33,49 @@ public class GameManager
         Logger.LogInfo("GameManager", "Game manager initialized");
     }
 
+    private const float RestartGameCooldownSeconds = 3.0f;
+    private float _lastRestartGameTime = -RestartGameCooldownSeconds;
+
+    // Jointeam from the team menu fires this once per player; without the cooldown, two
+    // players joining in quick succession run mp_restartgame twice within the same second,
+    // and the second restart lands while the first is still tearing the round down - that
+    // is the crash when players join spectator and pick a team (upstream issue #186).
+    public void RestartGameIfEmpty()
+    {
+        if (QueueManager.ActivePlayerCount != 0)
+        {
+            return;
+        }
+
+        var timeSinceLastRestart = Server.CurrentTime - _lastRestartGameTime;
+        if (timeSinceLastRestart >= 0 && timeSinceLastRestart < RestartGameCooldownSeconds)
+        {
+            Logger.LogDebug("GameManager", "Skipping game restart, cooldown active");
+            return;
+        }
+
+        // Claim the cooldown synchronously so two players joining in the same frame cannot both
+        // queue a restart, then run the restart itself a frame later: this is reached from inside
+        // the jointeam hook, and mp_restartgame plus the TerminateRound behind RestartGame() must
+        // not re-enter the engine while it is still handling that command.
+        _lastRestartGameTime = Server.CurrentTime;
+
+        Server.NextFrame(() =>
+        {
+            // Someone may have picked a team in the meantime - only restart if still empty.
+            if (QueueManager.ActivePlayerCount != 0)
+            {
+                Logger.LogDebug("GameManager", "Players joined before the restart landed, skipping");
+                return;
+            }
+
+            Logger.LogDebug("GameManager", "No active players, updating queue and restarting game");
+            QueueManager.ClearRoundTeams();
+            QueueManager.Update();
+            GameRulesHelper.RestartGame();
+        });
+    }
+
     private bool _scrambleNextRound;
 
     public void ScrambleNextRound(CCSPlayerController? admin = null)
@@ -48,10 +91,10 @@ public class GameManager
         _scrambleNextRound = false;
         _consecutiveRoundsWon = 0;
 
-        var shuffledActivePlayers = PlayerHelper.Shuffle(QueueManager.ActivePlayers.ToList(), new Random());
+        var shuffledActivePlayers = PlayerHelper.Shuffle(QueueManager.ActivePlayers, new Random());
 
         var newTerrorists = shuffledActivePlayers.Take(QueueManager.GetTargetNumTerrorists()).ToList();
-        var newCounterTerrorists = shuffledActivePlayers.Except(newTerrorists).ToList();
+        var newCounterTerrorists = ExceptByUserId(shuffledActivePlayers, newTerrorists);
 
         SetTeams(newTerrorists, newCounterTerrorists);
         Logger.LogInfo("GameManager", "Teams scrambled");
@@ -187,7 +230,7 @@ public class GameManager
         if (newTerrorists.Count < targetNumTerrorists)
         {
             var playersLeft = PlayerHelper.Shuffle(
-                sortedCounterTerroristPlayers.Except(newTerrorists).ToList(),
+                ExceptByUserId(sortedCounterTerroristPlayers, newTerrorists),
                 new Random()
             );
             newTerrorists.AddRange(playersLeft.Take(targetNumTerrorists - newTerrorists.Count));
@@ -201,7 +244,7 @@ public class GameManager
             );
         }
 
-        var newCounterTerrorists = QueueManager.ActivePlayers.Except(newTerrorists).ToList();
+        var newCounterTerrorists = ExceptByUserId(QueueManager.ActivePlayers, newTerrorists);
 
         SetTeams(newTerrorists, newCounterTerrorists);
     }
@@ -225,7 +268,7 @@ public class GameManager
             if (newTerrorists.Count < numTerroristsNeeded)
             {
                 var playersLeft = PlayerHelper.Shuffle(
-                    sortedCounterTerroristPlayers.Except(newTerrorists).ToList(),
+                    ExceptByUserId(sortedCounterTerroristPlayers, newTerrorists),
                     new Random()
                 );
                 newTerrorists.AddRange(playersLeft.Take(numTerroristsNeeded - newTerrorists.Count));
@@ -237,9 +280,11 @@ public class GameManager
 
         if (numCounterTerroristsNeeded > 0)
         {
+            var newTerroristIds = UserIdsOf(newTerrorists);
+
             var terroristsWithZeroScore = QueueManager.ActivePlayers
-                .Where(player => PlayerHelper.IsValid(player) && player.Team == CsTeam.Terrorist && GetPlayerScore(player) == 0)
-                .Except(newTerrorists)
+                .Where(player => player.Team == CsTeam.Terrorist && GetPlayerScore(player) == 0)
+                .Where(player => PlayerHelper.TryGetUserId(player, out var userId) && !newTerroristIds.Contains(userId))
                 .ToList();
 
             newCounterTerrorists = PlayerHelper.Shuffle(terroristsWithZeroScore, new Random())
@@ -248,13 +293,18 @@ public class GameManager
 
             if (numCounterTerroristsNeeded > newCounterTerrorists.Count)
             {
+                var alreadyPickedIds = UserIdsOf(newCounterTerrorists);
+                alreadyPickedIds.UnionWith(newTerroristIds);
+
                 newCounterTerrorists.AddRange(
                     QueueManager.ActivePlayers
-                        .Except(newCounterTerrorists)
-                        .Except(newTerrorists)
-                        .Where(player => PlayerHelper.IsValid(player) && player.Team == CsTeam.Terrorist)
+                        .Where(player => PlayerHelper.TryGetUserId(player, out var userId) && !alreadyPickedIds.Contains(userId))
+                        .Where(player => player.Team == CsTeam.Terrorist)
                         .OrderBy(GetPlayerScore)
-                        .Take(numTerroristsNeeded - newCounterTerrorists.Count)
+                        // Was numTerroristsNeeded: the CT top-up was sized against the number of
+                        // Ts still wanted, which is a different (often smaller or negative)
+                        // number, so CT was left under-filled.
+                        .Take(numCounterTerroristsNeeded - newCounterTerrorists.Count)
                         .ToList()
                 );
             }
@@ -295,7 +345,6 @@ public class GameManager
     private List<CCSPlayerController> GetSortedActivePlayers(CsTeam? team = null)
     {
         return QueueManager.ActivePlayers
-            .Where(PlayerHelper.IsValid)
             .Where(player => team == null || player.Team == team)
             .OrderByDescending(GetPlayerScore)
             .ToList();
@@ -312,27 +361,37 @@ public class GameManager
         terrorists ??= [];
         counterTerrorists ??= [];
 
-        foreach (var player in QueueManager.ActivePlayers.Where(PlayerHelper.IsValid))
+        // Membership is decided by UserId: the controllers in these lists were resolved before
+        // the switches above and List.Contains would fall back to pointer-shaped identity.
+        var terroristIds = UserIdsOf(terrorists);
+        var counterTerroristIds = UserIdsOf(counterTerrorists);
+
+        foreach (var player in QueueManager.ActivePlayers)
         {
-            if (terrorists.Contains(player))
+            if (!PlayerHelper.TryGetUserId(player, out var userId))
             {
-                player.SwitchTeam(CsTeam.Terrorist);
+                continue;
             }
-            else if (counterTerrorists.Contains(player))
+
+            if (terroristIds.Contains(userId))
             {
-                player.SwitchTeam(CsTeam.CounterTerrorist);
+                PlayerHelper.TrySwitchTeam(player, CsTeam.Terrorist);
+            }
+            else if (counterTerroristIds.Contains(userId))
+            {
+                PlayerHelper.TrySwitchTeam(player, CsTeam.CounterTerrorist);
             }
         }
 
         Logger.LogDebug("GameManager", $"Teams set: {terrorists.Count} T, {counterTerrorists.Count} CT");
     }
 
-    public HookResult RemoveSpectators(EventPlayerTeam @event, HashSet<CCSPlayerController> hasMutedVoices)
+    public HookResult RemoveSpectators(EventPlayerTeam @event, HashSet<int> hasMutedVoices)
     {
         if (!_removeSpectatorsEnabled) return HookResult.Continue;
 
         CCSPlayerController? player = @event.Userid;
-        if (!PlayerHelper.IsValid(player))
+        if (!PlayerHelper.TryGetUserId(player, out var userId))
         {
             return HookResult.Continue;
         }
@@ -340,14 +399,40 @@ public class GameManager
         int team = @event.Team;
         if (team == (int)CsTeam.Spectator)
         {
-            if (QueueManager.ActivePlayers.Contains(player))
+            if (QueueManager.IsActive(player))
             {
                 QueueManager.RemovePlayerFromQueues(player);
-                hasMutedVoices.Remove(player);
-                Logger.LogInfo("GameManager", $"{player.PlayerName} moved to spectator and removed from queues");
+                hasMutedVoices.Remove(userId);
+                Logger.LogInfo("GameManager", $"{player!.PlayerName} moved to spectator and removed from queues");
             }
         }
 
         return HookResult.Continue;
+    }
+
+    // Set operations over players are done on UserIds, never on controller instances - see the
+    // comment on QueueManager's id sets for why controller identity cannot be trusted.
+    private static HashSet<int> UserIdsOf(IEnumerable<CCSPlayerController> players)
+    {
+        HashSet<int> userIds = [];
+
+        foreach (var player in players)
+        {
+            if (PlayerHelper.TryGetUserId(player, out var userId))
+            {
+                userIds.Add(userId);
+            }
+        }
+
+        return userIds;
+    }
+
+    private static List<CCSPlayerController> ExceptByUserId(IEnumerable<CCSPlayerController> players, IEnumerable<CCSPlayerController> excluded)
+    {
+        var excludedIds = UserIdsOf(excluded);
+
+        return players
+            .Where(player => PlayerHelper.TryGetUserId(player, out var userId) && !excludedIds.Contains(userId))
+            .ToList();
     }
 }

@@ -9,11 +9,11 @@ namespace RetakesPlugin.Commands.Player;
 
 public class VoicesCommand
 {
-    private readonly HashSet<CCSPlayerController> _hasMutedVoices;
+    private readonly HashSet<int> _hasMutedVoices;
     private readonly BaseConfigs _config;
     private readonly RetakesPlugin _plugin;
 
-    public VoicesCommand(RetakesPlugin plugin, BaseConfigs config, HashSet<CCSPlayerController> hasMutedVoices)
+    public VoicesCommand(RetakesPlugin plugin, BaseConfigs config, HashSet<int> hasMutedVoices)
     {
         _plugin = plugin;
         _config = config;
@@ -34,15 +34,21 @@ public class VoicesCommand
             return;
         }
 
+        if (!PlayerHelper.TryGetUserId(player, out var userId))
+        {
+            commandInfo.ReplyToCommand($"{_plugin.Localizer["retakes.prefix"]} You must be a valid player to use this command.");
+            return;
+        }
+
         var didMute = false;
-        if (!_hasMutedVoices.Contains(player))
+        if (!_hasMutedVoices.Contains(userId))
         {
             didMute = true;
-            _hasMutedVoices.Add(player);
+            _hasMutedVoices.Add(userId);
         }
         else
         {
-            _hasMutedVoices.Remove(player);
+            _hasMutedVoices.Remove(userId);
         }
 
         var statusText = didMute ? $"{_plugin.Localizer["retakes.enabled"]}" : $"{_plugin.Localizer["retakes.disabled"]}";

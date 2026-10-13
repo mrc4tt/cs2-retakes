@@ -24,7 +24,7 @@ namespace RetakesPlugin;
 [MinimumApiVersion(345)]
 public class RetakesPlugin : BasePlugin, IPluginConfig<BaseConfigs>
 {
-    public const string Version = "3.0.4";
+    public const string Version = "3.0.5";
 
     #region Plugin Info
     public override string ModuleName => "Retakes Plugin";
@@ -87,7 +87,8 @@ public class RetakesPlugin : BasePlugin, IPluginConfig<BaseConfigs>
     #endregion
 
     #region State
-    private readonly HashSet<CCSPlayerController> _hasMutedVoices = [];
+    // Keyed by UserId, not by controller - see PlayerHelper.TryGetUserId.
+    private readonly HashSet<int> _hasMutedVoices = [];
     #endregion
 
     public RetakesPlugin()
@@ -372,13 +373,7 @@ public class RetakesPlugin : BasePlugin, IPluginConfig<BaseConfigs>
         var response = _gameManager.QueueManager.PlayerJoinedTeam(player, fromTeam, toTeam);
         _gameManager.QueueManager.DebugQueues(false);
 
-        if (_gameManager.QueueManager.ActivePlayers.Count == 0)
-        {
-            Utils.Logger.LogDebug("Commands", "No active players, updating queue and restarting game");
-            _gameManager.QueueManager.ClearRoundTeams();
-            _gameManager.QueueManager.Update();
-            GameRulesHelper.RestartGame();
-        }
+        _gameManager.RestartGameIfEmpty();
 
         return response;
     }
