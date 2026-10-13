@@ -1,7 +1,14 @@
-[![GitHub Downloads](https://img.shields.io/github/downloads/b3none/cs2-retakes/total.svg?style=flat-square&label=Downloads)](https://github.com/b3none/cs2-retakes/releases/latest)
-![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/b3none/cs2-retakes/plugin-build.yml?branch=master&style=flat-square&label=Latest%20Build)
+# CS2 Retakes (fshost build)
 
-# CS2 Retakes
+> This is fshost's maintained copy of **[B3none/cs2-retakes](https://github.com/B3none/cs2-retakes)**
+> by **B3none** and contributors, based on the CS:GO retakes plugin by Splewis.
+> All credit for the plugin goes to the original authors. It is distributed under the
+> original GPL-3.0 license (see [LICENSE](LICENSE)).
+>
+> Differences from upstream: built against the CounterStrikeSharp API fshost runs
+> (mrc4tt/CounterStrikeSharp), fshost fixes listed in [CHANGELOG.md](CHANGELOG.md), and
+> support for being loaded mid-map with `css_plugins load`.
+
 CS2 implementation of retakes written in C# for CounterStrikeSharp. Based on the version for CS:GO by Splewis.
 
 ## Share the love
@@ -31,10 +38,9 @@ If you appreciate the project then please take the time to star the repository ð
 
 ## Installation
 1. Install [CounterStrike Sharp](https://github.com/roflmuffin/CounterStrikeSharp) and [Metamod:Source](https://www.sourcemm.net/downloads.php/?branch=master)
-2. Download the plugin from the [releases section](https://github.com/B3none/cs2-retakes/releases/latest):
-   - **RetakesPlugin-[version].zip** - Includes pre-configured map spawns (recommended for new installations)
-   - **RetakesPlugin-[version]-no-map-configs.zip** - Without map configurations (for custom setups)
-3. Unzip the archive and upload it to the game server into your `addons/counterstrikesharp/` directory.
+2. Download **RetakesPlugin.zip** from the [releases section](https://github.com/mrc4tt/cs2-retakes/releases/latest)
+   (includes the pre-configured map spawns and the `RetakesPluginShared` API).
+3. Unzip the archive into the game server's `csgo/` directory (it contains `addons/counterstrikesharp/...`).
 4. Start the server and wait for the config.json file to be generated in `addons/counterstrikesharp/configs/plugins/RetakesPlugin`.
 5. Complete the configuration file with the parameters of your choice.
 

@@ -12,8 +12,6 @@
         <Nullable>enable</Nullable>
         <RootNamespace>RetakesPluginShared</RootNamespace>
         <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
-        <OutputPath>..\build-output\addons\counterstrikesharp\shared\RetakesPluginShared\</OutputPath>
-        <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
         <DebugType>portable</DebugType>
 
         <PackageReadmeFile>README.md</PackageReadmeFile>

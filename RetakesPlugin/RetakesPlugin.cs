@@ -133,11 +133,75 @@ public class RetakesPlugin : BasePlugin, IPluginConfig<BaseConfigs>
             Utils.Logger.LogServer($"Update detected, restarting map...");
             Server.ExecuteCommand($"map {Server.MapName}");
         }
+        else if (IsMapRunning())
+        {
+            // Loaded with css_plugins load while a map is already running (how fshost's
+            // CustomCommands switches to retakes). OnMapStart has already fired for this map,
+            // so set everything up for the current map instead of waiting for the next one.
+            Server.NextFrame(InitializeForRunningMap);
+        }
 
         Utils.Logger.LogInfo("Main", "Plugin loaded successfully");
     }
 
     #region Map Initialization
+    private static bool IsMapRunning()
+    {
+        try
+        {
+            return !string.IsNullOrEmpty(Server.MapName);
+        }
+        catch
+        {
+            // Globals are not available before the first map has started.
+            return false;
+        }
+    }
+
+    private void InitializeForRunningMap()
+    {
+        var mapName = Server.MapName;
+        Utils.Logger.LogInfo("Main", $"Loaded mid-map, initializing for {mapName} without a map change");
+
+        OnMapStart(mapName);
+
+        if (_gameManager == null)
+        {
+            return;
+        }
+
+        // Players already on a team never send jointeam or player_connect_full again, so
+        // queue them as if they had just picked their team.
+        foreach (var player in Utilities.GetPlayers())
+        {
+            if (!PlayerHelper.IsValid(player) || player.IsBot || player.IsHLTV)
+            {
+                continue;
+            }
+
+            player.ForceTeamTime = 3600.0f;
+
+            if (player.Team is CounterStrikeSharp.API.Modules.Utils.CsTeam.Terrorist
+                or CounterStrikeSharp.API.Modules.Utils.CsTeam.CounterTerrorist)
+            {
+                _gameManager.QueueManager.PlayerJoinedTeam(player, CounterStrikeSharp.API.Modules.Utils.CsTeam.Spectator, player.Team);
+            }
+        }
+
+        // OnMapStart executes cs2-retakes/retakes.cfg after 1 second; restart once it has applied.
+        AddTimer(1.5f, () =>
+        {
+            if (_gameManager == null)
+            {
+                return;
+            }
+
+            _gameManager.QueueManager.ClearRoundTeams();
+            _gameManager.QueueManager.Update();
+            GameRulesHelper.RestartGame();
+        });
+    }
+
     private void OnMapStart(string mapName)
     {
         Utils.Logger.LogInfo("MapStart", $"Map started: {mapName}");
