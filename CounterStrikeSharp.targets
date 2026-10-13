@@ -5,11 +5,13 @@
     downloaded once into .css/<version>/ (git-ignored) and referenced with Private=false, so
     nothing from CounterStrikeSharp's api/ folder ends up in the plugin's build output.
 
-    Opt in per project with <UseCounterStrikeSharp>true</UseCounterStrikeSharp>.
+    Opt in per project with <UseCounterStrikeSharp>true</UseCounterStrikeSharp>. Test projects
+    that run the code outside the game set <CssCopyLocal>true</CssCopyLocal>.
     Bump the version here (or pass -p:CssVersion=x.y.z) when fshost updates CounterStrikeSharp.
   -->
   <PropertyGroup>
     <CssVersion Condition="'$(CssVersion)' == ''">1.0.407</CssVersion>
+    <CssCopyLocal Condition="'$(CssCopyLocal)' == ''">false</CssCopyLocal>
     <CssRepo Condition="'$(CssRepo)' == ''">mrc4tt/CounterStrikeSharp</CssRepo>
     <CssRoot>$(MSBuildThisFileDirectory).css/$(CssVersion)/</CssRoot>
     <CssApiDir>$(CssRoot)addons/counterstrikesharp/api/</CssApiDir>
@@ -28,12 +30,12 @@
   <Target Name="AddCounterStrikeSharpReferences"
           Condition="'$(UseCounterStrikeSharp)' == 'true'"
           DependsOnTargets="FetchCounterStrikeSharpApi"
-          BeforeTargets="ResolveAssemblyReferences">
+          BeforeTargets="_HandlePackageFileConflicts;ResolveAssemblyReferences">
     <ItemGroup>
       <_CssApiDll Include="$(CssApiDir)*.dll" />
       <Reference Include="@(_CssApiDll->'%(Filename)')">
         <HintPath>%(_CssApiDll.FullPath)</HintPath>
-        <Private>false</Private>
+        <Private>$(CssCopyLocal)</Private>
       </Reference>
     </ItemGroup>
     <Error Condition="!Exists('$(CssApiDir)CounterStrikeSharp.API.dll')"

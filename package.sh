@@ -36,7 +36,7 @@ cp -r RetakesPluginShared/bin/Release/net10.0/. "$SHARED_DIR/"
 
 # Linux only, no debug symbols or backups.
 find "$STAGE" \( -name '*.pdb' -o -name '*.bak' \) -delete
-find "$STAGE" -type d -path '*/runtimes/*' \( -name 'win*' -o -name 'osx*' \) -prune -exec rm -rf {} +
+find "$STAGE" -type d -path '*/runtimes/*' -prune ! -name linux-x64 ! -name unix -exec rm -rf {} +
 
 test -f "$PLUGIN_DIR/$PLUGIN.dll"
 test -f "$SHARED_DIR/$SHARED.dll"
