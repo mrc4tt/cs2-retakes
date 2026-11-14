@@ -60,5 +60,7 @@
   "retakes.afk.warning": "You seem to be AFK. Move next round or you will be moved to spectator.",
   "retakes.afk.moved": "You were moved to spectator for being AFK. Pick a team to join the queue again.",
   "retakes.queue.waiting_for_players": "Waiting for players: {green}{0}{default}/{green}{1}{default}. The game will start once enough players have joined.",
-  "retakes.queue.minimum_players_reached": "Enough players have joined - the game is starting!"
+  "retakes.queue.minimum_players_reached": "Enough players have joined - the game is starting!",
+  "retakes.plugin.enabled": "The retakes plugin has been {green}enabled{default}.",
+  "retakes.plugin.disabled": "The retakes plugin has been {red}disabled{default}."
 }

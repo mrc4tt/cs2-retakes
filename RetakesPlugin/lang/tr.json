@@ -60,5 +60,7 @@
   "retakes.afk.warning": "AFK görünüyorsunuz. Bir sonraki rauntta hareket edin, yoksa izleyiciye alınacaksınız.",
   "retakes.afk.moved": "AFK olduğunuz için izleyiciye alındınız. Tekrar sıraya girmek için bir takım seçin.",
   "retakes.queue.waiting_for_players": "Oyuncular bekleniyor: {green}{0}{default}/{green}{1}{default}. Yeterli oyuncu katıldığında oyun başlayacak.",
-  "retakes.queue.minimum_players_reached": "Yeterli oyuncu katıldı - oyun başlıyor!"
+  "retakes.queue.minimum_players_reached": "Yeterli oyuncu katıldı - oyun başlıyor!",
+  "retakes.plugin.enabled": "Retakes eklentisi {green}etkinleştirildi{default}.",
+  "retakes.plugin.disabled": "Retakes eklentisi {red}devre dışı bırakıldı{default}."
 }

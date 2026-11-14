@@ -116,6 +116,22 @@ public class GameManager
     }
     #endregion
 
+    // retakes_enabled 0: forget every player and pending action so nothing touches players
+    // while retakes is off. retakes_enabled 1 rebuilds the queues from the current teams.
+    public void ResetForDisable()
+    {
+        CancelWaitingForPlayers();
+        Server.ExecuteCommand("mp_warmup_pausetimer 0");
+
+        _pendingRestartTimer?.Kill();
+        _pendingRestartTimer = null;
+
+        QueueManager.ClearAll();
+        AfkManager.Reset();
+        ResetWinStreak();
+        _scrambleNextRound = false;
+    }
+
     // How long to collect joiners before the first round starts on an empty server.
     private const float RestartGameDelaySeconds = 5.0f;
     private CounterStrikeSharp.API.Modules.Timers.Timer? _pendingRestartTimer;
@@ -150,6 +166,11 @@ public class GameManager
         _pendingRestartTimer = _plugin.AddTimer(RestartGameDelaySeconds, () =>
         {
             _pendingRestartTimer = null;
+
+            if (!_plugin.IsPluginEnabled)
+            {
+                return;
+            }
 
             // Someone may have been seated in the meantime (warmup join) - only restart if still empty.
             if (QueueManager.ActivePlayerCount != 0)

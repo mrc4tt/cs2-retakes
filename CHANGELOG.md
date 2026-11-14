@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.0.8
+- New `retakes_enabled` convar: `0` turns retakes off on the fly (clears the queues and restores the server's convars), `1` turns it back on and restarts with the players already on a team (ported from upstream 3.1.0).
+- New `cfg/cs2-retakes/retakes_unload.cfg`, executed on `retakes_enabled 0` and on `css_plugins unload`, restores the convars `retakes.cfg` changes. It is created on first map start so it can be adjusted up front; its `bot_quota` is 0 so leaving retakes adds no bots.
+
 ## 3.0.7
 - Chat, center and console messages are shown in each player's own language (set with `!lang`), instead of the server language for everyone.
 - Command replies that were English-only (usage hints, errors, spawn editor and map config messages) are now translated in all languages.

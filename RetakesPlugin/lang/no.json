@@ -60,5 +60,7 @@
   "retakes.afk.warning": "Det ser ut som du er AFK. Beveg deg neste runde, ellers blir du flyttet til tilskuer.",
   "retakes.afk.moved": "Du ble flyttet til tilskuer for å være AFK. Velg et lag for å komme i køen igjen.",
   "retakes.queue.waiting_for_players": "Venter på spillere: {green}{0}{default}/{green}{1}{default}. Spillet starter når det er nok spillere.",
-  "retakes.queue.minimum_players_reached": "Det er nå nok spillere - spillet starter!"
+  "retakes.queue.minimum_players_reached": "Det er nå nok spillere - spillet starter!",
+  "retakes.plugin.enabled": "Retakes-pluginen har blitt {green}aktivert{default}.",
+  "retakes.plugin.disabled": "Retakes-pluginen har blitt {red}deaktivert{default}."
 }

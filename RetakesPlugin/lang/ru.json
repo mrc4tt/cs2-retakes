@@ -60,5 +60,7 @@
   "retakes.afk.warning": "Похоже, вы AFK. Двигайтесь в следующем раунде, иначе вас переведут в наблюдатели.",
   "retakes.afk.moved": "Вас перевели в наблюдатели за AFK. Выберите команду, чтобы снова встать в очередь.",
   "retakes.queue.waiting_for_players": "Ожидание игроков: {green}{0}{default}/{green}{1}{default}. Игра начнётся, когда наберётся достаточно игроков.",
-  "retakes.queue.minimum_players_reached": "Достаточно игроков присоединилось - игра начинается!"
+  "retakes.queue.minimum_players_reached": "Достаточно игроков присоединилось - игра начинается!",
+  "retakes.plugin.enabled": "Плагин retakes был {green}включен{default}.",
+  "retakes.plugin.disabled": "Плагин retakes был {red}выключен{default}."
 }

@@ -60,5 +60,7 @@
   "retakes.afk.warning": "Vaikutat olevan AFK. Liiku seuraavalla kierroksella, muuten sinut siirretään katsojaksi.",
   "retakes.afk.moved": "Sinut siirrettiin katsojaksi AFK:n takia. Valitse joukkue palataksesi jonoon.",
   "retakes.queue.waiting_for_players": "Odotetaan pelaajia: {green}{0}{default}/{green}{1}{default}. Peli alkaa, kun pelaajia on tarpeeksi.",
-  "retakes.queue.minimum_players_reached": "Pelaajia on nyt tarpeeksi - peli alkaa!"
+  "retakes.queue.minimum_players_reached": "Pelaajia on nyt tarpeeksi - peli alkaa!",
+  "retakes.plugin.enabled": "Retakes-lisäosa on {green}otettu käyttöön{default}.",
+  "retakes.plugin.disabled": "Retakes-lisäosa on {red}poistettu käytöstä{default}."
 }

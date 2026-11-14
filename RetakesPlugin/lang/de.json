@@ -60,5 +60,7 @@
   "retakes.afk.warning": "Du scheinst AFK zu sein. Bewege dich nächste Runde, sonst wirst du zum Zuschauer verschoben.",
   "retakes.afk.moved": "Du wurdest wegen AFK zum Zuschauer verschoben. Wähle ein Team, um dich wieder anzustellen.",
   "retakes.queue.waiting_for_players": "Warte auf Spieler: {green}{0}{default}/{green}{1}{default}. Das Spiel startet, sobald genügend Spieler beigetreten sind.",
-  "retakes.queue.minimum_players_reached": "Genügend Spieler sind beigetreten - das Spiel startet!"
+  "retakes.queue.minimum_players_reached": "Genügend Spieler sind beigetreten - das Spiel startet!",
+  "retakes.plugin.enabled": "Das Retakes-Plugin wurde {green}aktiviert{default}.",
+  "retakes.plugin.disabled": "Das Retakes-Plugin wurde {red}deaktiviert{default}."
 }

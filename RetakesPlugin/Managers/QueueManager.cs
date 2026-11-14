@@ -481,6 +481,14 @@ public class QueueManager
         }
     }
 
+    public void ClearAll()
+    {
+        _activePlayerIds.Clear();
+        _queuePlayerIds.Clear();
+        ClearRoundTeams();
+        Logger.LogInfo("QueueManager", "All queues cleared");
+    }
+
     public void ClearRoundTeams()
     {
         _roundTerroristIds.Clear();

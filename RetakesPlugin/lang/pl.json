@@ -60,5 +60,7 @@
   "retakes.afk.warning": "Wygląda na to, że jesteś AFK. Rusz się w następnej rundzie, inaczej zostaniesz przeniesiony do widzów.",
   "retakes.afk.moved": "Zostałeś przeniesiony do widzów za AFK. Wybierz drużynę, aby wrócić do kolejki.",
   "retakes.queue.waiting_for_players": "Oczekiwanie na graczy: {green}{0}{default}/{green}{1}{default}. Gra rozpocznie się, gdy dołączy wystarczająca liczba graczy.",
-  "retakes.queue.minimum_players_reached": "Dołączyła wystarczająca liczba graczy - gra się rozpoczyna!"
+  "retakes.queue.minimum_players_reached": "Dołączyła wystarczająca liczba graczy - gra się rozpoczyna!",
+  "retakes.plugin.enabled": "Plugin retakes został {green}włączony{default}.",
+  "retakes.plugin.disabled": "Plugin retakes został {red}wyłączony{default}."
 }

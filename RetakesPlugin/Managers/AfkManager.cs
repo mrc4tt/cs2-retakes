@@ -123,6 +123,13 @@ public class AfkManager
         _flagged.Clear();
     }
 
+    public void Reset()
+    {
+        _snapshots.Clear();
+        _afkRounds.Clear();
+        _flagged.Clear();
+    }
+
     public void Forget(int userId)
     {
         _snapshots.Remove(userId);

@@ -38,7 +38,7 @@ public class PlayerEventHandlers
                 // drops inside this 1 second window frees the controller, and the captured
                 // wrapper would be a pointer into freed memory that IsValid cannot detect.
                 var player = PlayerHelper.ResolveConnected(connectedUserId);
-                if (player == null)
+                if (player == null || !_plugin.IsPluginEnabled)
                 {
                     return;
                 }

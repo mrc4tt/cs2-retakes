@@ -148,6 +148,13 @@ To disable slot priority and immunity features, set both arrays to empty:
 |-------------|-------------------------------------------------------------|---------|-------|------|
 | IsDebugMode | Whether to enable debug output to the server console or not. | false   | false | true |
 
+## ConVars & server config files
+| ConVar / file | Description |
+|---|---|
+| `retakes_enabled` | `0` turns retakes off without unloading the plugin: all queues are cleared and `retakes_unload.cfg` is executed. `1` turns it back on: `retakes.cfg` is executed, players already on a team are queued and the game restarts. Default `1`. |
+| `cfg/cs2-retakes/retakes.cfg` | Executed on every map start while retakes is enabled. Created with defaults if missing. |
+| `cfg/cs2-retakes/retakes_unload.cfg` | Executed on `retakes_enabled 0` and on `css_plugins unload` (not on a hot reload). Restores the convars `retakes.cfg` changes. Created with defaults on first map start, so it can be adjusted up front. |
+
 ## Commands
 
 ### General Commands

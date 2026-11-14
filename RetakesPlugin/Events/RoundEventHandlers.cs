@@ -301,8 +301,13 @@ public class RoundEventHandlers
 
         _plugin.AddTimer(4.1f, () =>
         {
+            if (!_plugin.IsPluginEnabled)
+            {
+                return;
+            }
+
             _announcementService.AnnounceBombsite(_currentBombsite, true);
-        });
+        }, CounterStrikeSharp.API.Modules.Timers.TimerFlags.STOP_ON_MAPCHANGE);
 
         return HookResult.Continue;
     }

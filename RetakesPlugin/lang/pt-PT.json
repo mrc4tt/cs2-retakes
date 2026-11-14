@@ -60,5 +60,7 @@
   "retakes.afk.warning": "Parece que estás AFK. Mexe-te na próxima ronda ou serás movido para espectador.",
   "retakes.afk.moved": "Foste movido para espectador por estares AFK. Escolhe uma equipa para voltar à fila.",
   "retakes.queue.waiting_for_players": "A aguardar jogadores: {green}{0}{default}/{green}{1}{default}. O jogo começará quando houver jogadores suficientes.",
-  "retakes.queue.minimum_players_reached": "Já há jogadores suficientes - o jogo vai começar!"
+  "retakes.queue.minimum_players_reached": "Já há jogadores suficientes - o jogo vai começar!",
+  "retakes.plugin.enabled": "O plugin de retakes foi {green}ativado{default}.",
+  "retakes.plugin.disabled": "O plugin de retakes foi {red}desativado{default}."
 }

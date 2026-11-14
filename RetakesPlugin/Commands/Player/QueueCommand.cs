@@ -25,6 +25,12 @@ public class QueueCommand
             return;
         }
 
+        if (!_plugin.IsPluginEnabled)
+        {
+            commandInfo.ReplyToCommand(_plugin.Prefixed(player, "retakes.plugin.disabled"));
+            return;
+        }
+
         var queueManager = _gameManager.QueueManager;
 
         if (queueManager.IsActive(player))

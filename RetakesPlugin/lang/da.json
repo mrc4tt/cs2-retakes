@@ -60,5 +60,7 @@
   "retakes.afk.warning": "Det ser ud til at du er AFK. Bevæg dig næste runde, ellers bliver du flyttet til spectator.",
   "retakes.afk.moved": "Du er blevet flyttet til spectator for at være AFK. Vælg et hold for at komme i køen igen.",
   "retakes.queue.waiting_for_players": "Venter på spillere: {green}{0}{default}/{green}{1}{default}. Spillet starter, når der er nok spillere.",
-  "retakes.queue.minimum_players_reached": "Der er nu nok spillere - spillet starter!"
+  "retakes.queue.minimum_players_reached": "Der er nu nok spillere - spillet starter!",
+  "retakes.plugin.enabled": "Retakes-pluginnet er blevet {green}aktiveret{default}.",
+  "retakes.plugin.disabled": "Retakes-pluginnet er blevet {red}deaktiveret{default}."
 }
