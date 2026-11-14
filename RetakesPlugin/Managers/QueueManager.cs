@@ -105,6 +105,49 @@ public class QueueManager
     public bool IsQueued(CCSPlayerController? player) =>
         PlayerHelper.TryGetUserId(player, out var userId) && _queuePlayerIds.Contains(userId);
 
+    // The order Update() pulls players out of the queue in: highest priority first, then slot.
+    private List<CCSPlayerController> OrderedQueuePlayers()
+    {
+        return QueuePlayers
+            .Select(player => new
+            {
+                Player = player,
+                Priority = PlayerHelper.GetQueuePriority(player, _queuePriorityFlags)
+            })
+            .OrderByDescending(x => x.Priority)
+            .ThenBy(x => x.Player.Slot)
+            .Select(x => x.Player)
+            .ToList();
+    }
+
+    // 1-based position in the queue, or null when the player is not queued.
+    public (int Position, int Total)? GetQueuePosition(CCSPlayerController? player)
+    {
+        if (!PlayerHelper.TryGetUserId(player, out var userId) || !_queuePlayerIds.Contains(userId))
+        {
+            return null;
+        }
+
+        var ordered = OrderedQueuePlayers();
+        var index = ordered.FindIndex(p => PlayerHelper.TryGetUserId(p, out var id) && id == userId);
+
+        return index < 0 ? null : (index + 1, ordered.Count);
+    }
+
+    // Takes an active player out of the game without putting them in the queue (AFK handling).
+    // They rejoin the queue the normal way, by picking a team.
+    public bool MoveActiveToSpectator(CCSPlayerController player)
+    {
+        if (!PlayerHelper.TryGetUserId(player, out var userId) || !_activePlayerIds.Contains(userId))
+        {
+            return false;
+        }
+
+        Forget(userId);
+        PlayerHelper.TryChangeTeam(player, CsTeam.Spectator);
+        return true;
+    }
+
     public void AddActivePlayer(CCSPlayerController? player)
     {
         if (PlayerHelper.TryGetUserId(player, out var userId))
@@ -337,16 +380,8 @@ public class QueueManager
         var playersToAdd = _maxRetakesPlayers - activePlayerCount;
         if (playersToAdd > 0 && _queuePlayerIds.Count > 0)
         {
-            var playersToAddList = QueuePlayers
-                .Select(player => new
-                {
-                    Player = player,
-                    Priority = PlayerHelper.GetQueuePriority(player, _queuePriorityFlags)
-                })
-                .OrderByDescending(x => x.Priority)
-                .ThenBy(x => x.Player.Slot)
+            var playersToAddList = OrderedQueuePlayers()
                 .Take(playersToAdd)
-                .Select(x => x.Player)
                 .ToList();
 
             foreach (var player in playersToAddList)
@@ -395,9 +430,18 @@ public class QueueManager
             return;
         }
 
+        var wasActive = _activePlayerIds.Contains(userId);
         Forget(userId);
 
         Logger.LogDebug("QueueManager", $"Removed {player!.PlayerName} from all queues");
+
+        // Tell whoever is first in line that they are in next round.
+        if (wasActive && ActivePlayerCount < _maxRetakesPlayers)
+        {
+            var next = OrderedQueuePlayers().FirstOrDefault();
+            next?.PrintToChat(_plugin.Prefixed(next, "retakes.queue.next"));
+        }
+
         GameRulesHelper.CheckRoundDone();
     }
 

@@ -22,6 +22,11 @@ public class QueueSettings
     [JsonPropertyName("ShouldAutoJoinSpectators")]
     public bool ShouldAutoJoinSpectators { get; set; } = true;
 
+    // Active players who stay AFK this many rounds in a row are moved to spectator so the queue
+    // can take their slot. 0 disables AFK handling.
+    [JsonPropertyName("AfkRoundsToSpectator")]
+    public int AfkRoundsToSpectator { get; set; } = 3;
+
     public List<QueuePriorityFlagConfig> GetPriorityFlags()
     {
         if (QueuePriorityFlag == null || QueuePriorityFlag.Count == 0)

@@ -74,6 +74,7 @@ public class RetakesPlugin : BasePlugin, IPluginConfig<BaseConfigs>
 
     // Player Commands
     private VoicesCommand? _voicesCommand;
+    private QueueCommand? _queueCommand;
 
     // Spawn Editor Commands
     private ShowSpawnsCommand? _showSpawnsCommand;
@@ -278,7 +279,8 @@ public class RetakesPlugin : BasePlugin, IPluginConfig<BaseConfigs>
                 Config.Team.RoundsToScramble,
                 Config.Team.IsScrambleEnabled,
                 Config.Queue.ShouldRemoveSpectators,
-                Config.Team.IsBalanceEnabled
+                Config.Team.IsBalanceEnabled,
+                Config.Queue.AfkRoundsToSpectator
             );
 
             _breakerManager = new BreakerManager(
@@ -323,6 +325,7 @@ public class RetakesPlugin : BasePlugin, IPluginConfig<BaseConfigs>
             _mapConfigsCommand = new MapConfigsCommand(this, ModuleDirectory);
 
             _voicesCommand = new VoicesCommand(this, Config, _hasMutedVoices);
+            _queueCommand = new QueueCommand(this, _gameManager);
 
             _showSpawnsCommand = new ShowSpawnsCommand(this);
             _addSpawnCommand = new AddSpawnCommand(this, _showSpawnsCommand);
@@ -346,7 +349,7 @@ public class RetakesPlugin : BasePlugin, IPluginConfig<BaseConfigs>
 
     private void RegisterCommands()
     {
-        if (_forceBombsiteCommand == null || _forceBombsiteStopCommand == null || _scrambleCommand == null || _debugQueuesCommand == null || _mapConfigCommand == null || _mapConfigsCommand == null || _voicesCommand == null || _showSpawnsCommand == null || _addSpawnCommand == null || _removeSpawnCommand == null || _nearestSpawnCommand == null || _hideSpawnsCommand == null)
+        if (_forceBombsiteCommand == null || _forceBombsiteStopCommand == null || _scrambleCommand == null || _debugQueuesCommand == null || _mapConfigCommand == null || _mapConfigsCommand == null || _voicesCommand == null || _queueCommand == null || _showSpawnsCommand == null || _addSpawnCommand == null || _removeSpawnCommand == null || _nearestSpawnCommand == null || _hideSpawnsCommand == null)
         {
             Utils.Logger.LogWarning("Commands", "Cannot register commands - command handlers not initialized");
             return;
@@ -387,6 +390,7 @@ public class RetakesPlugin : BasePlugin, IPluginConfig<BaseConfigs>
 
         // Player Commands
         AddCommand("css_voices", "Toggles whether or not you want to hear bombsite voice announcements.", _voicesCommand.OnCommand);
+        AddCommand("css_queue", "Shows your position in the waiting queue.", _queueCommand.OnCommand);
 
         Utils.Logger.LogInfo("Commands", "All commands registered successfully");
     }

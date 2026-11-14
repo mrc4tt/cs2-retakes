@@ -51,5 +51,12 @@
   "retakes.mapconfig.loaded": "Die neue Map-Konfiguration wurde erfolgreich geladen.",
   "retakes.voices.disabled_server": "Sprachansagen für Bombenstellen sind auf diesem Server dauerhaft deaktiviert.",
   "retakes.teams.server_owner": "Der Serverbesitzer",
-  "retakes.update_restart": "Update erkannt, Map wird neu gestartet..."
+  "retakes.update_restart": "Update erkannt, Map wird neu gestartet...",
+
+  "retakes.queue.position": "Du bist Nummer {green}{0}{default} von {1} in der Warteschlange.",
+  "retakes.queue.status_playing": "Du spielst. {green}{0}{default} Spieler warten in der Warteschlange.",
+  "retakes.queue.not_queued": "Du bist nicht in der Warteschlange. Wähle ein Team, um beizutreten.",
+  "retakes.queue.next": "Ein Platz ist frei geworden - du bist nächste Runde dabei!",
+  "retakes.afk.warning": "Du scheinst AFK zu sein. Bewege dich nächste Runde, sonst wirst du zum Zuschauer verschoben.",
+  "retakes.afk.moved": "Du wurdest wegen AFK zum Zuschauer verschoben. Wähle ein Team, um dich wieder anzustellen."
 }

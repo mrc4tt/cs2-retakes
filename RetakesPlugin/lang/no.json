@@ -51,5 +51,12 @@
   "retakes.mapconfig.loaded": "Den nye kartkonfigurasjonen er lastet inn.",
   "retakes.voices.disabled_server": "Stemmekunngjøringer for bombested er permanent deaktivert på denne serveren.",
   "retakes.teams.server_owner": "Servereieren",
-  "retakes.update_restart": "Oppdatering oppdaget, starter kartet på nytt..."
+  "retakes.update_restart": "Oppdatering oppdaget, starter kartet på nytt...",
+
+  "retakes.queue.position": "Du er nummer {green}{0}{default} av {1} i køen.",
+  "retakes.queue.status_playing": "Du spiller. {green}{0}{default} spiller(e) venter i køen.",
+  "retakes.queue.not_queued": "Du er ikke i køen. Velg et lag for å bli med.",
+  "retakes.queue.next": "En plass har blitt ledig - du blir med neste runde!",
+  "retakes.afk.warning": "Det ser ut som du er AFK. Beveg deg neste runde, ellers blir du flyttet til tilskuer.",
+  "retakes.afk.moved": "Du ble flyttet til tilskuer for å være AFK. Velg et lag for å komme i køen igjen."
 }

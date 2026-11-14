@@ -87,6 +87,9 @@ public class RoundEventHandlers
 
         _gameManager.QueueManager.ClearRoundTeams();
 
+        // Free the slots of AFK players before the queue update, so the queue fills them now.
+        _gameManager.AfkManager.MoveFlaggedToSpectator(_gameManager.QueueManager);
+
         Logger.LogDebug("Round", "Updating queues");
         _gameManager.QueueManager.DebugQueues(true);
         _gameManager.QueueManager.Update();
@@ -238,6 +241,9 @@ public class RoundEventHandlers
             HandleAutoPlant();
         }
 
+        // Only real retakes are judged for AFK; a 1v0 round snapshots nobody.
+        _gameManager.AfkManager.OnFreezeEnd(_roundWasContested ? _gameManager.QueueManager.ActivePlayers : []);
+
         return HookResult.Continue;
     }
 
@@ -246,11 +252,14 @@ public class RoundEventHandlers
         _lastRoundWinner = (CsTeam)@event.Winner;
         Logger.LogInfo("Round", $"Round ended. Winner: {_lastRoundWinner}");
 
-        if (!_roundWasContested || GameRulesHelper.IsRoundEndPending())
+        var wasRealRound = _roundWasContested && !GameRulesHelper.IsRoundEndPending();
+        if (!wasRealRound)
         {
             Logger.LogDebug("Round", "Round was not a real retake, not counting it towards the win streak");
             _lastRoundWinner = CsTeam.None;
         }
+
+        _gameManager.AfkManager.OnRoundEnd(wasRealRound);
 
         _roundWasContested = false;
         return HookResult.Continue;

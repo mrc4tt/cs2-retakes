@@ -51,5 +51,12 @@
   "retakes.mapconfig.loaded": "Uusi karttakonfiguraatio on ladattu onnistuneesti.",
   "retakes.voices.disabled_server": "Pommipaikkojen ääni-ilmoitukset on poistettu pysyvästi käytöstä tällä palvelimella.",
   "retakes.teams.server_owner": "Palvelimen omistaja",
-  "retakes.update_restart": "Päivitys havaittu, käynnistetään kartta uudelleen..."
+  "retakes.update_restart": "Päivitys havaittu, käynnistetään kartta uudelleen...",
+
+  "retakes.queue.position": "Olet jonossa sijalla {green}{0}{default}/{1}.",
+  "retakes.queue.status_playing": "Pelaat. Jonossa odottaa {green}{0}{default} pelaajaa.",
+  "retakes.queue.not_queued": "Et ole jonossa. Valitse joukkue liittyäksesi.",
+  "retakes.queue.next": "Paikka vapautui - pääset peliin seuraavalla kierroksella!",
+  "retakes.afk.warning": "Vaikutat olevan AFK. Liiku seuraavalla kierroksella, muuten sinut siirretään katsojaksi.",
+  "retakes.afk.moved": "Sinut siirrettiin katsojaksi AFK:n takia. Valitse joukkue palataksesi jonoon."
 }

@@ -51,5 +51,12 @@
   "retakes.mapconfig.loaded": "Новая конфигурация карты успешно загружена.",
   "retakes.voices.disabled_server": "Голосовые объявления точки закладки навсегда отключены на этом сервере.",
   "retakes.teams.server_owner": "Владелец сервера",
-  "retakes.update_restart": "Обнаружено обновление, перезапуск карты..."
+  "retakes.update_restart": "Обнаружено обновление, перезапуск карты...",
+
+  "retakes.queue.position": "Вы {green}{0}{default}-й из {1} в очереди.",
+  "retakes.queue.status_playing": "Вы играете. В очереди ждут: {green}{0}{default}.",
+  "retakes.queue.not_queued": "Вы не в очереди. Выберите команду, чтобы присоединиться.",
+  "retakes.queue.next": "Освободилось место - вы играете со следующего раунда!",
+  "retakes.afk.warning": "Похоже, вы AFK. Двигайтесь в следующем раунде, иначе вас переведут в наблюдатели.",
+  "retakes.afk.moved": "Вас перевели в наблюдатели за AFK. Выберите команду, чтобы снова встать в очередь."
 }

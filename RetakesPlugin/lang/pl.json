@@ -51,5 +51,12 @@
   "retakes.mapconfig.loaded": "Nowa konfiguracja mapy została pomyślnie wczytana.",
   "retakes.voices.disabled_server": "Głosowe komunikaty o bombsite'ach są na tym serwerze trwale wyłączone.",
   "retakes.teams.server_owner": "Właściciel serwera",
-  "retakes.update_restart": "Wykryto aktualizację, restartowanie mapy..."
+  "retakes.update_restart": "Wykryto aktualizację, restartowanie mapy...",
+
+  "retakes.queue.position": "Jesteś numerem {green}{0}{default} z {1} w kolejce.",
+  "retakes.queue.status_playing": "Grasz. W kolejce czeka {green}{0}{default} graczy.",
+  "retakes.queue.not_queued": "Nie jesteś w kolejce. Wybierz drużynę, aby dołączyć.",
+  "retakes.queue.next": "Zwolniło się miejsce - dołączasz w następnej rundzie!",
+  "retakes.afk.warning": "Wygląda na to, że jesteś AFK. Rusz się w następnej rundzie, inaczej zostaniesz przeniesiony do widzów.",
+  "retakes.afk.moved": "Zostałeś przeniesiony do widzów za AFK. Wybierz drużynę, aby wrócić do kolejki."
 }

@@ -51,5 +51,12 @@
   "retakes.mapconfig.loaded": "Yeni harita yapılandırması başarıyla yüklendi.",
   "retakes.voices.disabled_server": "Bomba bölgesi sesli duyuruları bu sunucuda kalıcı olarak devre dışı.",
   "retakes.teams.server_owner": "Sunucu sahibi",
-  "retakes.update_restart": "Güncelleme algılandı, harita yeniden başlatılıyor..."
+  "retakes.update_restart": "Güncelleme algılandı, harita yeniden başlatılıyor...",
+
+  "retakes.queue.position": "Bekleme sırasında {1} kişiden {green}{0}{default}. sıradasınız.",
+  "retakes.queue.status_playing": "Oynuyorsunuz. Sırada {green}{0}{default} oyuncu bekliyor.",
+  "retakes.queue.not_queued": "Sırada değilsiniz. Katılmak için bir takım seçin.",
+  "retakes.queue.next": "Bir yer açıldı - bir sonraki rauntta oyundasınız!",
+  "retakes.afk.warning": "AFK görünüyorsunuz. Bir sonraki rauntta hareket edin, yoksa izleyiciye alınacaksınız.",
+  "retakes.afk.moved": "AFK olduğunuz için izleyiciye alındınız. Tekrar sıraya girmek için bir takım seçin."
 }

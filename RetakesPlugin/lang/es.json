@@ -51,5 +51,12 @@
   "retakes.mapconfig.loaded": "La nueva configuración del mapa se cargó correctamente.",
   "retakes.voices.disabled_server": "Los anuncios de voz de los sitios de bomba están desactivados permanentemente en este servidor.",
   "retakes.teams.server_owner": "El dueño del servidor",
-  "retakes.update_restart": "Actualización detectada, reiniciando el mapa..."
+  "retakes.update_restart": "Actualización detectada, reiniciando el mapa...",
+
+  "retakes.queue.position": "Eres el número {green}{0}{default} de {1} en la lista de espera.",
+  "retakes.queue.status_playing": "Estás jugando. {green}{0}{default} jugador(es) en la lista de espera.",
+  "retakes.queue.not_queued": "No estás en la lista de espera. Elige un equipo para unirte.",
+  "retakes.queue.next": "Se ha liberado un lugar: ¡entras en la próxima ronda!",
+  "retakes.afk.warning": "Parece que estás AFK. Muévete la próxima ronda o serás movido a espectador.",
+  "retakes.afk.moved": "Fuiste movido a espectador por estar AFK. Elige un equipo para volver a la lista de espera."
 }

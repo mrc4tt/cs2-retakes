@@ -51,5 +51,12 @@
   "retakes.mapconfig.loaded": "Den nya kartkonfigurationen har laddats.",
   "retakes.voices.disabled_server": "Röstmeddelanden för bombplats är permanent avstängda på den här servern.",
   "retakes.teams.server_owner": "Serverägaren",
-  "retakes.update_restart": "Uppdatering upptäckt, startar om kartan..."
+  "retakes.update_restart": "Uppdatering upptäckt, startar om kartan...",
+
+  "retakes.queue.position": "Du är nummer {green}{0}{default} av {1} i kön.",
+  "retakes.queue.status_playing": "Du spelar. {green}{0}{default} spelare väntar i kön.",
+  "retakes.queue.not_queued": "Du är inte i kön. Välj ett lag för att gå med.",
+  "retakes.queue.next": "En plats har blivit ledig - du är med nästa runda!",
+  "retakes.afk.warning": "Det verkar som att du är AFK. Rör på dig nästa runda, annars flyttas du till åskådare.",
+  "retakes.afk.moved": "Du flyttades till åskådare för att du var AFK. Välj ett lag för att ställa dig i kön igen."
 }

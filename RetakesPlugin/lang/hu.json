@@ -51,5 +51,12 @@
   "retakes.mapconfig.loaded": "Az új pályakonfiguráció sikeresen betöltve.",
   "retakes.voices.disabled_server": "A bombahelyek hangos bemondása ezen a szerveren véglegesen ki van kapcsolva.",
   "retakes.teams.server_owner": "A szerver tulajdonosa",
-  "retakes.update_restart": "Frissítés észlelve, a pálya újraindul..."
+  "retakes.update_restart": "Frissítés észlelve, a pálya újraindul...",
+
+  "retakes.queue.position": "A(z) {green}{0}{default}. vagy a(z) {1} fős várólistán.",
+  "retakes.queue.status_playing": "Játszol. {green}{0}{default} játékos vár a várólistán.",
+  "retakes.queue.not_queued": "Nem vagy a várólistán. Válassz csapatot a csatlakozáshoz.",
+  "retakes.queue.next": "Felszabadult egy hely - a következő körben bekerülsz!",
+  "retakes.afk.warning": "Úgy tűnik, AFK vagy. Mozdulj meg a következő körben, különben nézőbe kerülsz.",
+  "retakes.afk.moved": "AFK miatt nézőbe lettél helyezve. Válassz csapatot, hogy újra a várólistára kerülj."
 }

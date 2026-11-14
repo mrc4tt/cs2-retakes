@@ -51,5 +51,12 @@
   "retakes.mapconfig.loaded": "Yangi xarita konfiguratsiyasi muvaffaqiyatli yuklandi.",
   "retakes.voices.disabled_server": "Bu serverda bomba nuqtasi ovozli e'lonlari butunlay o'chirilgan.",
   "retakes.teams.server_owner": "Server egasi",
-  "retakes.update_restart": "Yangilanish aniqlandi, xarita qayta ishga tushirilmoqda..."
+  "retakes.update_restart": "Yangilanish aniqlandi, xarita qayta ishga tushirilmoqda...",
+
+  "retakes.queue.position": "Siz navbatda {1} tadan {green}{0}{default}-o‘rindasiz.",
+  "retakes.queue.status_playing": "Siz o‘ynayapsiz. Navbatda {green}{0}{default} o‘yinchi kutmoqda.",
+  "retakes.queue.not_queued": "Siz navbatda emassiz. Qo‘shilish uchun jamoani tanlang.",
+  "retakes.queue.next": "Joy bo‘shadi - keyingi raundda o‘yinga kirasiz!",
+  "retakes.afk.warning": "Siz AFK ko‘rinasiz. Keyingi raundda harakat qiling, aks holda tomoshabinga o‘tkazilasiz.",
+  "retakes.afk.moved": "AFK bo‘lganingiz uchun tomoshabinga o‘tkazildingiz. Navbatga qaytish uchun jamoani tanlang."
 }

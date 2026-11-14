@@ -51,5 +51,12 @@
   "retakes.mapconfig.loaded": "Konfigurimi i ri i hartës u ngarkua me sukses.",
   "retakes.voices.disabled_server": "Njoftimet me zë për vendin e bombës janë çaktivizuar përgjithmonë në këtë server.",
   "retakes.teams.server_owner": "Pronari i serverit",
-  "retakes.update_restart": "U zbulua një përditësim, harta po rinis..."
+  "retakes.update_restart": "U zbulua një përditësim, harta po rinis...",
+
+  "retakes.queue.position": "Je numri {green}{0}{default} nga {1} në radhën e pritjes.",
+  "retakes.queue.status_playing": "Po luan. {green}{0}{default} lojtarë presin në radhë.",
+  "retakes.queue.not_queued": "Nuk je në radhë. Zgjidh një ekip për t'u bashkuar.",
+  "retakes.queue.next": "U lirua një vend - hyn në lojë raundin e ardhshëm!",
+  "retakes.afk.warning": "Duket se je AFK. Lëviz raundin e ardhshëm, përndryshe do të kalosh në spektator.",
+  "retakes.afk.moved": "U kalove në spektator sepse ishe AFK. Zgjidh një ekip për t'u kthyer në radhë."
 }

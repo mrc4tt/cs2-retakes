@@ -51,5 +51,12 @@
   "retakes.mapconfig.loaded": "A nova configuração do mapa foi carregada com sucesso.",
   "retakes.voices.disabled_server": "Os anúncios de voz dos bombsites estão desativados permanentemente neste servidor.",
   "retakes.teams.server_owner": "O dono do servidor",
-  "retakes.update_restart": "Atualização detectada, reiniciando o mapa..."
+  "retakes.update_restart": "Atualização detectada, reiniciando o mapa...",
+
+  "retakes.queue.position": "Você é o número {green}{0}{default} de {1} na fila de espera.",
+  "retakes.queue.status_playing": "Você está jogando. {green}{0}{default} jogador(es) na fila de espera.",
+  "retakes.queue.not_queued": "Você não está na fila. Escolha um time para entrar.",
+  "retakes.queue.next": "Uma vaga foi liberada - você entra na próxima rodada!",
+  "retakes.afk.warning": "Parece que você está AFK. Mova-se na próxima rodada ou será movido para espectador.",
+  "retakes.afk.moved": "Você foi movido para espectador por estar AFK. Escolha um time para voltar à fila."
 }

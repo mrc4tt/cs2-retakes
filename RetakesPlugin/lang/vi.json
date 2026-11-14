@@ -51,5 +51,12 @@
   "retakes.mapconfig.loaded": "Đã tải thành công cấu hình bản đồ mới.",
   "retakes.voices.disabled_server": "Thông báo giọng nói về điểm đặt bom đã bị tắt vĩnh viễn trên máy chủ này.",
   "retakes.teams.server_owner": "Chủ máy chủ",
-  "retakes.update_restart": "Phát hiện bản cập nhật, đang khởi động lại bản đồ..."
+  "retakes.update_restart": "Phát hiện bản cập nhật, đang khởi động lại bản đồ...",
+
+  "retakes.queue.position": "Bạn đang ở vị trí {green}{0}{default}/{1} trong hàng chờ.",
+  "retakes.queue.status_playing": "Bạn đang chơi. Có {green}{0}{default} người chơi trong hàng chờ.",
+  "retakes.queue.not_queued": "Bạn không ở trong hàng chờ. Hãy chọn một đội để tham gia.",
+  "retakes.queue.next": "Đã có chỗ trống - bạn sẽ vào chơi ở vòng sau!",
+  "retakes.afk.warning": "Có vẻ bạn đang AFK. Hãy di chuyển ở vòng sau, nếu không bạn sẽ bị chuyển sang khán giả.",
+  "retakes.afk.moved": "Bạn đã bị chuyển sang khán giả vì AFK. Hãy chọn một đội để vào lại hàng chờ."
 }

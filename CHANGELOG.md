@@ -8,6 +8,9 @@
 - Joining a team never ends the running round; queued players wait for the next round, also in 1v0.
 - On an empty server the first join no longer restarts the game instantly: players joining within 5 seconds are collected and start together with a single restart.
 - T win streak ("won N rounds in a row" / scramble) only counts real retakes: rounds with an empty side, rounds ended by the plugin and game restarts no longer count.
+- AFK players are moved to spectator after `AfkRoundsToSpectator` rounds (default 3, 0 = off) without moving or aiming, with a warning one round before; the queue fills their slot.
+- New `!queue` command shows your position in the waiting queue; the first in line is told when a slot opens.
+- Removed the hardcoded upstream contributor steam IDs that were granted `@css/vip` (queue priority) on every server.
 
 ## 3.0.6
 - Spawns edited or added in game (spawn editor) are saved to `addons/counterstrikesharp/configs/plugins/RetakesPlugin/map_config/<map>.json` and survive plugin updates.

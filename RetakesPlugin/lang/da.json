@@ -51,5 +51,12 @@
   "retakes.mapconfig.loaded": "Den nye map-konfiguration er indlæst.",
   "retakes.voices.disabled_server": "Stemmeannoncering af bombsite er permanent slået fra på denne server.",
   "retakes.teams.server_owner": "Serverejeren",
-  "retakes.update_restart": "Opdatering fundet, genstarter mappet..."
+  "retakes.update_restart": "Opdatering fundet, genstarter mappet...",
+
+  "retakes.queue.position": "Du er nummer {green}{0}{default} af {1} i køen.",
+  "retakes.queue.status_playing": "Du spiller. {green}{0}{default} spiller(e) venter i køen.",
+  "retakes.queue.not_queued": "Du er ikke i køen. Vælg et hold for at joine.",
+  "retakes.queue.next": "Der er blevet en plads ledig - du kommer med i næste runde!",
+  "retakes.afk.warning": "Det ser ud til at du er AFK. Bevæg dig næste runde, ellers bliver du flyttet til spectator.",
+  "retakes.afk.moved": "Du er blevet flyttet til spectator for at være AFK. Vælg et hold for at komme i køen igen."
 }

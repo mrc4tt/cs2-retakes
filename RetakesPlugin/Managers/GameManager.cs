@@ -12,6 +12,7 @@ public class GameManager
     private readonly RetakesPlugin _plugin;
     private Dictionary<int, PlayerScore> _playerScores = new();
     public readonly QueueManager QueueManager;
+    public readonly AfkManager AfkManager;
     private readonly int _consecutiveRoundWinsToScramble;
     private readonly bool _isScrambleEnabled;
     private readonly bool _removeSpectatorsEnabled;
@@ -21,10 +22,11 @@ public class GameManager
     public const int ScoreForAssist = 25;
     public const int ScoreForDefuse = 50;
 
-    public GameManager(RetakesPlugin plugin, QueueManager queueManager, int? roundsToScramble, bool? isScrambleEnabled, bool? removeSpectatorsEnabled, bool? isBalanceEnabled)
+    public GameManager(RetakesPlugin plugin, QueueManager queueManager, int? roundsToScramble, bool? isScrambleEnabled, bool? removeSpectatorsEnabled, bool? isBalanceEnabled, int? afkRoundsToSpectator)
     {
         _plugin = plugin;
         QueueManager = queueManager;
+        AfkManager = new AfkManager(plugin, afkRoundsToSpectator);
         _consecutiveRoundWinsToScramble = roundsToScramble ?? 5;
         _isScrambleEnabled = isScrambleEnabled ?? true;
         _removeSpectatorsEnabled = removeSpectatorsEnabled ?? false;

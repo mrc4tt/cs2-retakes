@@ -82,6 +82,7 @@ When the plugin is first loaded it will create `addons/counterstrikesharp/config
 | QueuePriorityFlag      | A list of priority flag configurations. Each entry contains DisplayName, Flag, and Priority. Players with higher priority can replace players with lower priority in the queue. | `[{"DisplayName": "VIP", "Flag": "@css/vip", "Priority": 0}]` | 0 | 100 |
 | QueueImmunityFlag      | A list of immunity flag configurations. Each entry contains DisplayName, Flag, and Priority. Players with immunity priority cannot be replaced by players with equal or lower priority. | `[{"DisplayName": "VIP", "Flag": "@css/vip", "Priority": 0}]` | 0 | 100 |
 | ShouldRemoveSpectators | When a player is moved to spectators, remove them from all retake queues. Ensures that AFK plugins work as expected. | true     | false | true |
+| AfkRoundsToSpectator   | Active players who stay AFK (no movement or aiming) this many rounds in a row are moved to spectator so the queue can take their slot. They are warned one round before. 0 disables it. | 3 | 0 | - |
 
 **QueuePriorityFlag and QueueImmunityFlag Configuration:**
 Each flag configuration object has the following properties:
@@ -156,6 +157,7 @@ To disable slot priority and immunity features, set both arrays to empty:
 | !scramble          |                                   | Scrambles the teams next round.                                      | @css/admin  |
 | !scrambleteams     |                                   | Scrambles the teams next round (alias).                              | @css/admin  |
 | !voices            |                                   | Toggles whether or not to hear the bombsite voice announcements.     |             |
+| !queue             |                                   | Shows your position in the waiting queue.                            |             |
 | css_debugqueues    |                                   | **SERVER ONLY** Shows the current queue state in the server console. |             |
 
 ### Spawn Editor Commands

@@ -1,5 +1,4 @@
 using CounterStrikeSharp.API.Core;
-using CounterStrikeSharp.API.Modules.Admin;
 using CounterStrikeSharp.API.Modules.Utils;
 
 using RetakesPlugin.Managers;
@@ -67,15 +66,6 @@ public class PlayerEventHandlers
             });
         }
 
-        // Grant VIP to contributors
-        if (new List<ulong> { 76561198028510846, 76561198044886803, 76561198414501446, 76561199074660131 }.Contains(player.SteamID))
-        {
-            var grant = "@css/vip";
-            Logger.LogInfo("Queue", $"You have been given queue priority {grant} for being a Retakes contributor!");
-            AdminManager.AddPlayerPermissions(player, grant);
-            Logger.LogInfo("Player", $"Granted VIP to contributor {player.PlayerName}");
-        }
-
         Logger.LogInfo("Player", $"{player.PlayerName} connected");
         return HookResult.Continue;
     }
@@ -116,6 +106,8 @@ public class PlayerEventHandlers
 
     public HookResult OnPlayerDeath(EventPlayerDeath @event, GameEventInfo info)
     {
+        _gameManager.AfkManager.OnPlayerDeath(@event.Userid);
+
         var attacker = @event.Attacker;
         var assister = @event.Assister;
 
@@ -146,6 +138,7 @@ public class PlayerEventHandlers
         if (PlayerHelper.TryGetUserId(player, out var userId))
         {
             _hasMutedVoices.Remove(userId);
+            _gameManager.AfkManager.Forget(userId);
         }
 
         _gameManager.QueueManager.RemovePlayerFromQueues(player);

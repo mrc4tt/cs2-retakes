@@ -51,5 +51,12 @@
   "retakes.mapconfig.loaded": "The new map config has been successfully loaded.",
   "retakes.voices.disabled_server": "Bombsite voice announcements are permanently disabled on this server.",
   "retakes.teams.server_owner": "The server owner",
-  "retakes.update_restart": "Update detected, restarting map..."
+  "retakes.update_restart": "Update detected, restarting map...",
+
+  "retakes.queue.position": "You are number {green}{0}{default} of {1} in the waiting queue.",
+  "retakes.queue.status_playing": "You are playing. {green}{0}{default} player(s) waiting in the queue.",
+  "retakes.queue.not_queued": "You are not in the queue. Pick a team to join.",
+  "retakes.queue.next": "A slot has opened up - you join the game next round!",
+  "retakes.afk.warning": "You seem to be AFK. Move next round or you will be moved to spectator.",
+  "retakes.afk.moved": "You were moved to spectator for being AFK. Pick a team to join the queue again."
 }

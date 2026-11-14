@@ -51,5 +51,12 @@
   "retakes.mapconfig.loaded": "تم تحميل إعدادات الخريطة الجديدة بنجاح.",
   "retakes.voices.disabled_server": "الإعلانات الصوتية لمواقع القنبلة معطلة نهائيًا على هذا الخادم.",
   "retakes.teams.server_owner": "مالك الخادم",
-  "retakes.update_restart": "تم اكتشاف تحديث، جارٍ إعادة تشغيل الخريطة..."
+  "retakes.update_restart": "تم اكتشاف تحديث، جارٍ إعادة تشغيل الخريطة...",
+
+  "retakes.queue.position": "أنت رقم {green}{0}{default} من {1} في قائمة الانتظار.",
+  "retakes.queue.status_playing": "أنت تلعب. {green}{0}{default} لاعب في قائمة الانتظار.",
+  "retakes.queue.not_queued": "أنت لست في قائمة الانتظار. اختر فريقًا للانضمام.",
+  "retakes.queue.next": "أصبح هناك مكان شاغر - ستنضم في الجولة القادمة!",
+  "retakes.afk.warning": "يبدو أنك غير نشط (AFK). تحرك في الجولة القادمة وإلا سيتم نقلك إلى المشاهدين.",
+  "retakes.afk.moved": "تم نقلك إلى المشاهدين لعدم النشاط (AFK). اختر فريقًا للعودة إلى قائمة الانتظار."
 }

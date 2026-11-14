@@ -51,5 +51,12 @@
   "retakes.mapconfig.loaded": "新的地圖設定已成功載入。",
   "retakes.voices.disabled_server": "此伺服器已永久停用包點語音播報。",
   "retakes.teams.server_owner": "伺服器擁有者",
-  "retakes.update_restart": "偵測到更新，正在重新啟動地圖..."
+  "retakes.update_restart": "偵測到更新，正在重新啟動地圖...",
+
+  "retakes.queue.position": "您在等待佇列中排第 {green}{0}{default} 位，共 {1} 人。",
+  "retakes.queue.status_playing": "您正在遊戲中。佇列中有 {green}{0}{default} 名玩家在等待。",
+  "retakes.queue.not_queued": "您不在佇列中。請選擇一個隊伍加入。",
+  "retakes.queue.next": "有空位了 - 您將在下一回合加入遊戲！",
+  "retakes.afk.warning": "您似乎處於掛機狀態。下一回合請移動，否則將被移至觀察者。",
+  "retakes.afk.moved": "您因掛機被移至觀察者。請選擇一個隊伍重新加入佇列。"
 }
