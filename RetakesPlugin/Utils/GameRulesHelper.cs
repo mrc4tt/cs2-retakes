@@ -42,7 +42,7 @@ public static class GameRulesHelper
     private const float RoundEndPendingTimeoutSeconds = 5.0f;
     private static float _roundEndRequestedAt = float.MinValue;
 
-    private static bool IsRoundEndPending()
+    public static bool IsRoundEndPending()
     {
         var elapsed = Server.CurrentTime - _roundEndRequestedAt;
 

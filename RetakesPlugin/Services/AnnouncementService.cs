@@ -39,8 +39,7 @@ public class AnnouncementService
         var numTerrorist = PlayerHelper.GetPlayerCount(CounterStrikeSharp.API.Modules.Utils.CsTeam.Terrorist);
         var numCounterTerrorist = PlayerHelper.GetPlayerCount(CounterStrikeSharp.API.Modules.Utils.CsTeam.CounterTerrorist);
 
-        var announcementMessage = _plugin.Localizer["retakes.bombsite.announcement", bombsite.ToString(), numTerrorist, numCounterTerrorist];
-        var centerAnnouncementMessage = _plugin.Localizer["retakes.center.bombsite.announcement", bombsite.ToString(), numTerrorist, numCounterTerrorist];
+        var bombsiteName = bombsite.ToString();
 
         // GetPlayers() also hands back bots, HLTV proxies and half-connected controllers;
         // PrintToChat / ExecuteClientCommand on those has no receiver and can touch a pawn that
@@ -59,12 +58,12 @@ public class AnnouncementService
 
             if (!onlyCenter)
             {
-                player.PrintToChat($"{_plugin.Localizer["retakes.prefix"]} {announcementMessage}");
+                player.PrintToChat(_plugin.Prefixed(player, "retakes.bombsite.announcement", bombsiteName, numTerrorist, numCounterTerrorist));
 
                 if (_voicesEnabled && !_hasMutedVoices.Contains(userId))
                 {
                     var bombsiteAnnouncer = BombsiteAnnouncers[_random.Next(BombsiteAnnouncers.Length)];
-                    player.ExecuteClientCommand($"play sounds/vo/agents/{bombsiteAnnouncer}/loc_{bombsite.ToString().ToLower()}_01");
+                    player.ExecuteClientCommand($"play sounds/vo/agents/{bombsiteAnnouncer}/loc_{bombsiteName.ToLower()}_01");
                 }
 
                 continue;
@@ -77,7 +76,7 @@ public class AnnouncementService
 
             if (player.Team == CounterStrikeSharp.API.Modules.Utils.CsTeam.CounterTerrorist)
             {
-                player.PrintToCenter(centerAnnouncementMessage);
+                player.PrintToCenter(_plugin.Tr(player, "retakes.center.bombsite.announcement", bombsiteName, numTerrorist, numCounterTerrorist));
             }
         }
 

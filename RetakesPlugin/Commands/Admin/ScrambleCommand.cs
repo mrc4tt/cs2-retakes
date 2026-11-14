@@ -29,7 +29,7 @@ public class ScrambleCommand
         var requiredPermission = PlayerHelper.GetCommandPermission(_plugin.Config, commandName, "Admin", "@css/admin");
         if (!AdminManager.PlayerHasPermissions(player, requiredPermission))
         {
-            commandInfo.ReplyToCommand($"{_plugin.Localizer["retakes.prefix"]} {_plugin.Localizer["retakes.no_permissions"]}");
+            commandInfo.ReplyToCommand(_plugin.Prefixed(player, "retakes.no_permissions"));
             return;
         }
 

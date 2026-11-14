@@ -37,20 +37,20 @@ public class ShowSpawnsCommand
         var requiredPermission = PlayerHelper.GetCommandPermission(_plugin.Config, commandName, "SpawnEditor");
         if (!AdminManager.PlayerHasPermissions(player, requiredPermission))
         {
-            commandInfo.ReplyToCommand($"{_plugin.Localizer["retakes.prefix"]} {_plugin.Localizer["retakes.no_permissions"]}");
+            commandInfo.ReplyToCommand(_plugin.Prefixed(player, "retakes.no_permissions"));
             return;
         }
 
         if (commandInfo.ArgCount < 2)
         {
-            commandInfo.ReplyToCommand($"{_plugin.Localizer["retakes.prefix"]} Usage: !showspawns [A/B]");
+            commandInfo.ReplyToCommand(_plugin.Prefixed(player, "retakes.spawns.show.usage"));
             return;
         }
 
         var bombsite = commandInfo.GetArg(1).ToUpper();
         if (bombsite != "A" && bombsite != "B")
         {
-            commandInfo.ReplyToCommand($"{_plugin.Localizer["retakes.prefix"]} You must specify a bombsite [A / B].");
+            commandInfo.ReplyToCommand(_plugin.Prefixed(player, "retakes.error.specify_bombsite"));
             return;
         }
 

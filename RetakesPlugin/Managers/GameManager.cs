@@ -33,13 +33,16 @@ public class GameManager
         Logger.LogInfo("GameManager", "Game manager initialized");
     }
 
-    private const float RestartGameCooldownSeconds = 3.0f;
-    private float _lastRestartGameTime = -RestartGameCooldownSeconds;
+    // How long to collect joiners before the first round starts on an empty server.
+    private const float RestartGameDelaySeconds = 5.0f;
+    private CounterStrikeSharp.API.Modules.Timers.Timer? _pendingRestartTimer;
 
-    // Jointeam from the team menu fires this once per player; without the cooldown, two
-    // players joining in quick succession run mp_restartgame twice within the same second,
-    // and the second restart lands while the first is still tearing the round down - that
-    // is the crash when players join spectator and pick a team (upstream issue #186).
+    // Called after every jointeam. When nobody is playing yet, the first player to pick a team
+    // used to restart the game straight away; friends joining a few seconds later then sat in the
+    // queue through a 1v0 round, and each extra join risked another restart. Instead, the first
+    // join schedules one restart a few seconds out, every joiner in that window is queued, and
+    // the single restart seats them all together. Running from a timer also keeps mp_restartgame
+    // out of the jointeam hook (upstream issue #186).
     public void RestartGameIfEmpty()
     {
         if (QueueManager.ActivePlayerCount != 0)
@@ -47,33 +50,38 @@ public class GameManager
             return;
         }
 
-        var timeSinceLastRestart = Server.CurrentTime - _lastRestartGameTime;
-        if (timeSinceLastRestart >= 0 && timeSinceLastRestart < RestartGameCooldownSeconds)
+        if (_pendingRestartTimer != null)
         {
-            Logger.LogDebug("GameManager", "Skipping game restart, cooldown active");
+            Logger.LogDebug("GameManager", "Game start already scheduled, joiner will be included");
             return;
         }
 
-        // Claim the cooldown synchronously so two players joining in the same frame cannot both
-        // queue a restart, then run the restart itself a frame later: this is reached from inside
-        // the jointeam hook, and mp_restartgame plus the TerminateRound behind RestartGame() must
-        // not re-enter the engine while it is still handling that command.
-        _lastRestartGameTime = Server.CurrentTime;
+        Logger.LogDebug("GameManager", $"No active players, starting game in {RestartGameDelaySeconds}s");
 
-        Server.NextFrame(() =>
+        _pendingRestartTimer = _plugin.AddTimer(RestartGameDelaySeconds, () =>
         {
-            // Someone may have picked a team in the meantime - only restart if still empty.
+            _pendingRestartTimer = null;
+
+            // Someone may have been seated in the meantime (warmup join) - only restart if still empty.
             if (QueueManager.ActivePlayerCount != 0)
             {
-                Logger.LogDebug("GameManager", "Players joined before the restart landed, skipping");
+                Logger.LogDebug("GameManager", "Players became active before the game start, skipping restart");
                 return;
             }
 
             Logger.LogDebug("GameManager", "No active players, updating queue and restarting game");
             QueueManager.ClearRoundTeams();
             QueueManager.Update();
+
+            // Everyone who joined left again inside the window - nothing to start.
+            if (QueueManager.ActivePlayerCount == 0)
+            {
+                return;
+            }
+
+            ResetWinStreak();
             GameRulesHelper.RestartGame();
-        });
+        }, CounterStrikeSharp.API.Modules.Timers.TimerFlags.STOP_ON_MAPCHANGE);
     }
 
     private bool _scrambleNextRound;
@@ -81,8 +89,16 @@ public class GameManager
     public void ScrambleNextRound(CCSPlayerController? admin = null)
     {
         _scrambleNextRound = true;
-        var message = $"{_plugin.Localizer["retakes.prefix"]} {_plugin.Localizer["retakes.teams.admin_scramble", admin?.PlayerName ?? "The server owner"]}";
-        Server.PrintToChatAll(message);
+        foreach (var player in Utilities.GetPlayers())
+        {
+            if (!PlayerHelper.IsValid(player) || !PlayerHelper.IsConnected(player) || player.IsBot || player.IsHLTV)
+            {
+                continue;
+            }
+
+            var adminName = admin?.PlayerName ?? _plugin.Tr(player, "retakes.teams.server_owner");
+            player.PrintToChat(_plugin.Prefixed(player, "retakes.teams.admin_scramble", adminName));
+        }
         Logger.LogInfo("GameManager", $"Teams will be scrambled next round by {admin?.PlayerName ?? "server"}");
     }
 
@@ -181,6 +197,11 @@ public class GameManager
 
     private int _consecutiveRoundsWon;
 
+    public void ResetWinStreak()
+    {
+        _consecutiveRoundsWon = 0;
+    }
+
     private void TerroristRoundWin()
     {
         _consecutiveRoundsWon++;
@@ -191,20 +212,17 @@ public class GameManager
 
         if (shouldScrambleNow)
         {
-            var message = $"{_plugin.Localizer["retakes.prefix"]} {_plugin.Localizer["retakes.teams.scramble", _consecutiveRoundWinsToScramble]}";
-            Server.PrintToChatAll(message);
+            _plugin.PrintToChatAllLocalized("retakes.teams.scramble", _consecutiveRoundWinsToScramble);
             Logger.LogInfo("GameManager", $"Scrambling teams after {_consecutiveRoundWinsToScramble} T wins");
             ScrambleTeams();
         }
         else if (shouldAlmostScramble)
         {
-            var message = $"{_plugin.Localizer["retakes.prefix"]} {_plugin.Localizer["retakes.teams.almost_scramble", _consecutiveRoundsWon, roundsLeftToScramble]}";
-            Server.PrintToChatAll(message);
+            _plugin.PrintToChatAllLocalized("retakes.teams.almost_scramble", _consecutiveRoundsWon, roundsLeftToScramble);
         }
         else if (_consecutiveRoundsWon >= 3)
         {
-            var message = $"{_plugin.Localizer["retakes.prefix"]} {_plugin.Localizer["retakes.teams.win_streak", _consecutiveRoundsWon]}";
-            Server.PrintToChatAll(message);
+            _plugin.PrintToChatAllLocalized("retakes.teams.win_streak", _consecutiveRoundsWon);
         }
     }
 
@@ -212,8 +230,7 @@ public class GameManager
     {
         if (_consecutiveRoundsWon >= 3)
         {
-            var message = $"{_plugin.Localizer["retakes.prefix"]} {_plugin.Localizer["retakes.teams.win_streak_over", _consecutiveRoundsWon]}";
-            Server.PrintToChatAll(message);
+            _plugin.PrintToChatAllLocalized("retakes.teams.win_streak_over", _consecutiveRoundsWon);
             Logger.LogInfo("GameManager", $"CT broke {_consecutiveRoundsWon} round win streak");
         }
 

@@ -32,13 +32,13 @@ public class RemoveSpawnCommand
         var requiredPermission = PlayerHelper.GetCommandPermission(_plugin.Config, commandName, "SpawnEditor");
         if (!AdminManager.PlayerHasPermissions(player, requiredPermission))
         {
-            commandInfo.ReplyToCommand($"{_plugin.Localizer["retakes.prefix"]} {_plugin.Localizer["retakes.no_permissions"]}");
+            commandInfo.ReplyToCommand(_plugin.Prefixed(player, "retakes.no_permissions"));
             return;
         }
 
         if (_showSpawnsCommand.ShowingSpawnsForBombsite == null)
         {
-            commandInfo.ReplyToCommand($"{_plugin.Localizer["retakes.prefix"]} You can't remove a spawn if you're not showing the spawns.");
+            commandInfo.ReplyToCommand(_plugin.Prefixed(player, "retakes.spawns.remove.not_showing"));
             return;
         }
 
@@ -49,7 +49,7 @@ public class RemoveSpawnCommand
 
         if (_plugin.SpawnManager == null || _plugin.MapConfigService == null)
         {
-            commandInfo.ReplyToCommand($"{_plugin.Localizer["retakes.prefix"]} Services not initialized.");
+            commandInfo.ReplyToCommand(_plugin.Prefixed(player, "retakes.error.services_not_initialized"));
             return;
         }
 
@@ -57,7 +57,7 @@ public class RemoveSpawnCommand
 
         if (spawns.Count == 0)
         {
-            commandInfo.ReplyToCommand($"{_plugin.Localizer["retakes.prefix"]} No spawns found.");
+            commandInfo.ReplyToCommand(_plugin.Prefixed(player, "retakes.spawns.none_found"));
             return;
         }
 
@@ -79,7 +79,7 @@ public class RemoveSpawnCommand
 
         if (closestSpawn == null)
         {
-            commandInfo.ReplyToCommand($"{_plugin.Localizer["retakes.prefix"]} No spawns found within 128 units.");
+            commandInfo.ReplyToCommand(_plugin.Prefixed(player, "retakes.spawns.remove.none_nearby"));
             return;
         }
 
@@ -91,7 +91,7 @@ public class RemoveSpawnCommand
             _plugin.SpawnManager.CalculateMapSpawns();
         }
 
-        commandInfo.ReplyToCommand($"{_plugin.Localizer["retakes.prefix"]} {(didRemoveSpawn ? "Spawn removed" : "Error removing spawn")}");
+        commandInfo.ReplyToCommand(_plugin.Prefixed(player, didRemoveSpawn ? "retakes.spawns.remove.success" : "retakes.spawns.remove.error"));
 
         if (didRemoveSpawn)
         {

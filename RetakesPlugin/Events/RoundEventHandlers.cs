@@ -31,6 +31,12 @@ public class RoundEventHandlers
     // pointer is exactly the dereference this is meant to avoid.
     private int? _planterUserId;
     private CsTeam _lastRoundWinner = CsTeam.None;
+
+    // Only a real retake (both sides had players at round start, and the round was not ended by
+    // the plugin itself) may count towards the T win streak. Rounds ended by a player joining
+    // (CheckRoundDone -> TerroristsWin), 1v0 rounds and game restarts used to be counted too, so
+    // the "won N rounds in a row" message ran ahead of the rounds actually played.
+    private bool _roundWasContested;
     private Bombsite? _forcedBombsite;
 
     public RoundEventHandlers(RetakesPlugin plugin, GameManager gameManager, SpawnManager spawnManager, BreakerManager? breakerManager, AllocationService allocationService, AnnouncementService announcementService, bool isAutoPlantEnabled, bool enableFallbackAllocation, bool enableFallbackBombsiteAnnouncement, Random random)
@@ -71,6 +77,8 @@ public class RoundEventHandlers
             return HookResult.Continue;
         }
 
+        _roundWasContested = false;
+
         if (gameRules.WarmupPeriod)
         {
             Logger.LogDebug("Round", "Warmup round, skipping pre-start logic");
@@ -86,6 +94,9 @@ public class RoundEventHandlers
 
         _gameManager.OnRoundPreStart(_lastRoundWinner);
         _gameManager.QueueManager.SetRoundTeams();
+
+        _roundWasContested = PlayerHelper.GetPlayerCount(CsTeam.Terrorist) > 0
+                             && PlayerHelper.GetPlayerCount(CsTeam.CounterTerrorist) > 0;
 
         Logger.LogInfo("Round", "Round pre-start complete");
         return HookResult.Continue;
@@ -234,6 +245,14 @@ public class RoundEventHandlers
     {
         _lastRoundWinner = (CsTeam)@event.Winner;
         Logger.LogInfo("Round", $"Round ended. Winner: {_lastRoundWinner}");
+
+        if (!_roundWasContested || GameRulesHelper.IsRoundEndPending())
+        {
+            Logger.LogDebug("Round", "Round was not a real retake, not counting it towards the win streak");
+            _lastRoundWinner = CsTeam.None;
+        }
+
+        _roundWasContested = false;
         return HookResult.Continue;
     }
 

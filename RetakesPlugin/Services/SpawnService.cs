@@ -29,7 +29,7 @@ public static class SpawnService
             ShowSpawn(spawn);
         }
 
-        Server.PrintToChatAll($"{plugin.Localizer["retakes.prefix"]} Showing {spawns.Count} spawns for bombsite {bombsite}.");
+        plugin.PrintToChatAllLocalized("retakes.spawns.showing", spawns.Count, bombsite.Value.ToString());
         Logger.LogInfo("SpawnService", $"Showing {spawns.Count} spawns for bombsite {bombsite}");
 
         return spawns.Count;

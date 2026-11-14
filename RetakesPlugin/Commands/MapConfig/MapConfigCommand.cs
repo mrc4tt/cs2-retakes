@@ -30,13 +30,13 @@ public class MapConfigCommand
         var requiredPermission = PlayerHelper.GetCommandPermission(_plugin.Config, commandName, "MapConfig");
         if (!AdminManager.PlayerHasPermissions(player, requiredPermission))
         {
-            commandInfo.ReplyToCommand($"{_plugin.Localizer["retakes.prefix"]} {_plugin.Localizer["retakes.no_permissions"]}");
+            commandInfo.ReplyToCommand(_plugin.Prefixed(player, "retakes.no_permissions"));
             return;
         }
 
         if (commandInfo.ArgCount < 2)
         {
-            commandInfo.ReplyToCommand($"{_plugin.Localizer["retakes.prefix"]} Usage: !mapconfig [filename]");
+            commandInfo.ReplyToCommand(_plugin.Prefixed(player, "retakes.mapconfig.usage"));
             return;
         }
 
@@ -45,13 +45,13 @@ public class MapConfigCommand
         if (mapConfigFileName.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0 ||
             !MapConfigPaths.Exists(_moduleDirectory, mapConfigFileName))
         {
-            commandInfo.ReplyToCommand($"{_plugin.Localizer["retakes.prefix"]} Map config file not found.");
+            commandInfo.ReplyToCommand(_plugin.Prefixed(player, "retakes.mapconfig.not_found"));
             return;
         }
 
         _onMapConfigLoad(mapConfigFileName);
 
-        commandInfo.ReplyToCommand($"{_plugin.Localizer["retakes.prefix"]} The new map config has been successfully loaded.");
+        commandInfo.ReplyToCommand(_plugin.Prefixed(player, "retakes.mapconfig.loaded"));
         Logger.LogInfo("Commands", $"Map config '{mapConfigFileName}' loaded by {player?.PlayerName ?? "Console"}");
     }
 }

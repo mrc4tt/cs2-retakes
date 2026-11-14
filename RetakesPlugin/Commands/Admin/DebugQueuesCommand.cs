@@ -22,14 +22,14 @@ public class DebugQueuesCommand
     {
         if (player != null)
         {
-            commandInfo.ReplyToCommand($"{_plugin.Localizer["retakes.prefix"]} This command can only be executed from the server console.");
+            commandInfo.ReplyToCommand(_plugin.Prefixed(player, "retakes.error.console_only"));
             return;
         }
 
         var requiredPermission = PlayerHelper.GetCommandPermission(_plugin.Config, "css_debugqueues", "Admin");
         if (!AdminManager.PlayerHasPermissions(player, requiredPermission))
         {
-            commandInfo.ReplyToCommand($"{_plugin.Localizer["retakes.prefix"]} {_plugin.Localizer["retakes.no_permissions"]}");
+            commandInfo.ReplyToCommand(_plugin.Prefixed(player, "retakes.no_permissions"));
             return;
         }
 

@@ -185,7 +185,8 @@ public class QueueManager
                 return HookResult.Handled;
             }
 
-            GameRulesHelper.CheckRoundDone();
+            // The team change is blocked (Handled), so the team counts cannot have changed and
+            // there is nothing for CheckRoundDone to react to. Joining must never end a round.
             return HookResult.Handled;
         }
 
@@ -208,11 +209,13 @@ public class QueueManager
             }
 
             Logger.LogInfo("QueueManager", $"[{player.PlayerName}] Added to queue");
-            player.PrintToChat($"{_plugin.Localizer["retakes.prefix"]} {_plugin.Localizer["retakes.queue.joined"]}");
+            player.PrintToChat(_plugin.Prefixed(player, "retakes.queue.joined"));
             _queuePlayerIds.Add(userId);
         }
 
-        GameRulesHelper.CheckRoundDone();
+        // Never end the running round because someone joined: a queued player waits for the next
+        // round, even when one side is empty (1v0). That round still ends on its own through the
+        // normal win conditions. Ending it here also used to feed fake T wins into the win streak.
         return HookResult.Handled;
     }
 
@@ -314,11 +317,11 @@ public class QueueManager
             PlayerHelper.TryChangeTeam(replaceablePlayer, CsTeam.Spectator);
             _activePlayerIds.Remove(replaceableUserId);
             _queuePlayerIds.Add(replaceableUserId);
-            replaceablePlayer.PrintToChat($"{_plugin.Localizer["retakes.prefix"]} {_plugin.Localizer["retakes.queue.replaced_by_vip", queuePlayer.PlayerName, queuePlayerDisplayName]}");
+            replaceablePlayer.PrintToChat(_plugin.Prefixed(replaceablePlayer, "retakes.queue.replaced_by_vip", queuePlayer.PlayerName, queuePlayerDisplayName));
 
             _activePlayerIds.Add(queueUserId);
             _queuePlayerIds.Remove(queueUserId);
-            queuePlayer.PrintToChat($"{_plugin.Localizer["retakes.prefix"]} {_plugin.Localizer["retakes.queue.vip_took_place", replaceablePlayer.PlayerName, queuePlayerDisplayName]}");
+            queuePlayer.PrintToChat(_plugin.Prefixed(queuePlayer, "retakes.queue.vip_took_place", replaceablePlayer.PlayerName, queuePlayerDisplayName));
 
             Logger.LogInfo("QueueManager", $"{queuePlayer.PlayerName} ({queuePlayerDisplayName}, priority: {queuePlayerPriority}) replaced {replaceablePlayer.PlayerName} (priority: {replaceablePlayerData.Priority})");
         }
@@ -374,10 +377,9 @@ public class QueueManager
         activePlayerCount = ActivePlayerCount;
         if (activePlayerCount == _maxRetakesPlayers && _queuePlayerIds.Count > 0)
         {
-            var waitingMessage = _plugin.Localizer["retakes.queue.waiting", activePlayerCount];
             foreach (var player in QueuePlayers)
             {
-                player.PrintToChat($"{_plugin.Localizer["retakes.prefix"]} {waitingMessage}");
+                player.PrintToChat(_plugin.Prefixed(player, "retakes.queue.waiting", activePlayerCount));
             }
         }
     }

@@ -32,13 +32,13 @@ public class NearestSpawnCommand
         var requiredPermission = PlayerHelper.GetCommandPermission(_plugin.Config, commandName, "SpawnEditor");
         if (!AdminManager.PlayerHasPermissions(player, requiredPermission))
         {
-            commandInfo.ReplyToCommand($"{_plugin.Localizer["retakes.prefix"]} {_plugin.Localizer["retakes.no_permissions"]}");
+            commandInfo.ReplyToCommand(_plugin.Prefixed(player, "retakes.no_permissions"));
             return;
         }
 
         if (_showSpawnsCommand.ShowingSpawnsForBombsite == null)
         {
-            commandInfo.ReplyToCommand($"{_plugin.Localizer["retakes.prefix"]} You must be in spawn editing mode.");
+            commandInfo.ReplyToCommand(_plugin.Prefixed(player, "retakes.spawns.nearest.not_editing"));
             return;
         }
 
@@ -49,7 +49,7 @@ public class NearestSpawnCommand
 
         if (_plugin.SpawnManager == null)
         {
-            commandInfo.ReplyToCommand($"{_plugin.Localizer["retakes.prefix"]} Services not initialized.");
+            commandInfo.ReplyToCommand(_plugin.Prefixed(player, "retakes.error.services_not_initialized"));
             return;
         }
 
@@ -57,7 +57,7 @@ public class NearestSpawnCommand
 
         if (spawns.Count == 0)
         {
-            commandInfo.ReplyToCommand($"{_plugin.Localizer["retakes.prefix"]} No spawns found.");
+            commandInfo.ReplyToCommand(_plugin.Prefixed(player, "retakes.spawns.none_found"));
             return;
         }
 
@@ -79,11 +79,11 @@ public class NearestSpawnCommand
 
         if (closestSpawn == null)
         {
-            commandInfo.ReplyToCommand($"{_plugin.Localizer["retakes.prefix"]} No spawns found.");
+            commandInfo.ReplyToCommand(_plugin.Prefixed(player, "retakes.spawns.none_found"));
             return;
         }
 
         player!.PlayerPawn.Value!.Teleport(closestSpawn.Vector, closestSpawn.QAngle, new Vector());
-        commandInfo.ReplyToCommand($"{_plugin.Localizer["retakes.prefix"]} Teleported to nearest spawn");
+        commandInfo.ReplyToCommand(_plugin.Prefixed(player, "retakes.spawns.nearest.teleported"));
     }
 }

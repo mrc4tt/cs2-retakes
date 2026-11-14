@@ -28,7 +28,7 @@ public class MapConfigsCommand
         var requiredPermission = PlayerHelper.GetCommandPermission(_plugin.Config, commandName, "MapConfig");
         if (!AdminManager.PlayerHasPermissions(player, requiredPermission))
         {
-            commandInfo.ReplyToCommand($"{_plugin.Localizer["retakes.prefix"]} {_plugin.Localizer["retakes.no_permissions"]}");
+            commandInfo.ReplyToCommand(_plugin.Prefixed(player, "retakes.no_permissions"));
             return;
         }
 
@@ -36,17 +36,17 @@ public class MapConfigsCommand
 
         if (mapConfigs.Count == 0)
         {
-            commandInfo.ReplyToCommand($"{_plugin.Localizer["retakes.prefix"]} No map configs found.");
+            commandInfo.ReplyToCommand(_plugin.Prefixed(player, "retakes.mapconfigs.none_found"));
             return;
         }
 
         foreach (var (name, isCustom) in mapConfigs)
         {
-            var line = $"{_plugin.Localizer["retakes.prefix"]} !mapconfig {name}{(isCustom ? " (custom)" : "")}";
+            var line = $"{_plugin.Tr(player, "retakes.prefix")} !mapconfig {name}{(isCustom ? $" {_plugin.Tr(player, "retakes.mapconfigs.custom")}" : "")}";
             commandInfo.ReplyToCommand(line);
             player?.PrintToConsole(line);
         }
 
-        commandInfo.ReplyToCommand($"{_plugin.Localizer["retakes.prefix"]} A list of available map configs has been outputted above.");
+        commandInfo.ReplyToCommand(_plugin.Prefixed(player, "retakes.mapconfigs.listed"));
     }
 }

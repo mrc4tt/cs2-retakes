@@ -28,13 +28,13 @@ public class ForceBombsiteStopCommand
         var requiredPermission = PlayerHelper.GetCommandPermission(_plugin.Config, "css_forcebombsitestop", "Admin");
         if (!AdminManager.PlayerHasPermissions(player, requiredPermission))
         {
-            commandInfo.ReplyToCommand($"{_plugin.Localizer["retakes.prefix"]} {_plugin.Localizer["retakes.no_permissions"]}");
+            commandInfo.ReplyToCommand(_plugin.Prefixed(player, "retakes.no_permissions"));
             return;
         }
 
         _roundEventHandlers.SetForcedBombsite(null);
 
-        commandInfo.ReplyToCommand($"{_plugin.Localizer["retakes.prefix"]} The bombsite will no longer be forced.");
+        commandInfo.ReplyToCommand(_plugin.Prefixed(player, "retakes.forcebombsite.stopped"));
         Logger.LogInfo("Commands", $"Forced bombsite cleared by {player?.PlayerName ?? "Console"}");
     }
 }

@@ -1,5 +1,14 @@
 # Changelog
 
+## 3.0.7
+- Chat, center and console messages are shown in each player's own language (set with `!lang`), instead of the server language for everyone.
+- Command replies that were English-only (usage hints, errors, spawn editor and map config messages) are now translated in all languages.
+- Uzbek bombsite announcement no longer shows a literal `[BLUE]` tag.
+- Added Albanian (`sq`) translation.
+- Joining a team never ends the running round; queued players wait for the next round, also in 1v0.
+- On an empty server the first join no longer restarts the game instantly: players joining within 5 seconds are collected and start together with a single restart.
+- T win streak ("won N rounds in a row" / scramble) only counts real retakes: rounds with an empty side, rounds ended by the plugin and game restarts no longer count.
+
 ## 3.0.6
 - Spawns edited or added in game (spawn editor) are saved to `addons/counterstrikesharp/configs/plugins/RetakesPlugin/map_config/<map>.json` and survive plugin updates.
 - A map config in `configs/plugins/RetakesPlugin/map_config/` overrides the shipped one in `plugins/RetakesPlugin/map_config/`; maps you never edited keep getting updated spawns with each release.

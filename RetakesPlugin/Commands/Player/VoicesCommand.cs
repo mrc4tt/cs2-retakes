@@ -24,19 +24,19 @@ public class VoicesCommand
     {
         if (!PlayerHelper.IsValid(player))
         {
-            commandInfo.ReplyToCommand($"{_plugin.Localizer["retakes.prefix"]} You must be a valid player to use this command.");
+            commandInfo.ReplyToCommand(_plugin.Prefixed(player, "retakes.error.invalid_player"));
             return;
         }
 
         if (!_config.MapConfig.EnableBombsiteAnnouncementVoices)
         {
-            commandInfo.ReplyToCommand($"{_plugin.Localizer["retakes.prefix"]} Bombsite voice announcements are permanently disabled on this server.");
+            commandInfo.ReplyToCommand(_plugin.Prefixed(player, "retakes.voices.disabled_server"));
             return;
         }
 
         if (!PlayerHelper.TryGetUserId(player, out var userId))
         {
-            commandInfo.ReplyToCommand($"{_plugin.Localizer["retakes.prefix"]} You must be a valid player to use this command.");
+            commandInfo.ReplyToCommand(_plugin.Prefixed(player, "retakes.error.invalid_player"));
             return;
         }
 
@@ -51,9 +51,9 @@ public class VoicesCommand
             _hasMutedVoices.Remove(userId);
         }
 
-        var statusText = didMute ? $"{_plugin.Localizer["retakes.enabled"]}" : $"{_plugin.Localizer["retakes.disabled"]}";
+        var statusText = didMute ? _plugin.Tr(player, "retakes.enabled") : _plugin.Tr(player, "retakes.disabled");
 
-        commandInfo.ReplyToCommand($"{_plugin.Localizer["retakes.prefix"]} {_plugin.Localizer["retakes.voices.toggle", statusText]}");
+        commandInfo.ReplyToCommand(_plugin.Prefixed(player, "retakes.voices.toggle", statusText));
 
         Logger.LogInfo("Commands", $"{player.PlayerName} {(didMute ? "muted" : "unmuted")} voice announcements");
     }

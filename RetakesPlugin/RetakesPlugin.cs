@@ -2,6 +2,7 @@ using CounterStrikeSharp.API;
 using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Core.Attributes;
 using CounterStrikeSharp.API.Core.Capabilities;
+using CounterStrikeSharp.API.Core.Translations;
 using CounterStrikeSharp.API.Modules.Commands;
 using RetakesPluginShared;
 using System.Text.Json;
@@ -24,7 +25,7 @@ namespace RetakesPlugin;
 [MinimumApiVersion(345)]
 public class RetakesPlugin : BasePlugin, IPluginConfig<BaseConfigs>
 {
-    public const string Version = "3.0.6";
+    public const string Version = "3.0.7";
 
     #region Plugin Info
     public override string ModuleName => "Retakes Plugin";
@@ -130,7 +131,13 @@ public class RetakesPlugin : BasePlugin, IPluginConfig<BaseConfigs>
 
         if (hotReload)
         {
-            Utils.Logger.LogServer($"Update detected, restarting map...");
+            foreach (var player in Utilities.GetPlayers())
+            {
+                if (PlayerHelper.IsValid(player) && PlayerHelper.IsConnected(player) && !player.IsBot && !player.IsHLTV)
+                {
+                    player.PrintToChat($"[Retakes {Version}] {Tr(player, "retakes.update_restart")}");
+                }
+            }
             Server.ExecuteCommand($"map {Server.MapName}");
         }
         else if (IsMapRunning())
@@ -143,6 +150,38 @@ public class RetakesPlugin : BasePlugin, IPluginConfig<BaseConfigs>
 
         Utils.Logger.LogInfo("Main", "Plugin loaded successfully");
     }
+
+    #region Translations
+    // Player-facing text goes out in each player's own language (css_lang); console, bots
+    // and a null player get the server language.
+    public string Tr(CCSPlayerController? player, string key, params object[] args)
+    {
+        if (player == null || !player.IsValid || player.IsBot || player.IsHLTV)
+        {
+            return Localizer[key, args];
+        }
+
+        return Localizer.ForPlayer(player, key, args);
+    }
+
+    public string Prefixed(CCSPlayerController? player, string key, params object[] args)
+    {
+        return $"{Tr(player, "retakes.prefix")} {Tr(player, key, args)}";
+    }
+
+    public void PrintToChatAllLocalized(string key, params object[] args)
+    {
+        foreach (var player in Utilities.GetPlayers())
+        {
+            if (!PlayerHelper.IsValid(player) || !PlayerHelper.IsConnected(player) || player.IsBot || player.IsHLTV)
+            {
+                continue;
+            }
+
+            player.PrintToChat(Prefixed(player, key, args));
+        }
+    }
+    #endregion
 
     #region Map Initialization
     private static bool IsMapRunning()
@@ -174,7 +213,7 @@ public class RetakesPlugin : BasePlugin, IPluginConfig<BaseConfigs>
         // queue them as if they had just picked their team.
         foreach (var player in Utilities.GetPlayers())
         {
-            if (!PlayerHelper.IsValid(player) || player.IsBot || player.IsHLTV)
+            if (!PlayerHelper.IsValid(player) || !PlayerHelper.IsConnected(player) || player.IsBot || player.IsHLTV)
             {
                 continue;
             }
