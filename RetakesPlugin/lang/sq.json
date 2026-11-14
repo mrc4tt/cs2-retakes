@@ -58,5 +58,7 @@
   "retakes.queue.not_queued": "Nuk je në radhë. Zgjidh një ekip për t'u bashkuar.",
   "retakes.queue.next": "U lirua një vend - hyn në lojë raundin e ardhshëm!",
   "retakes.afk.warning": "Duket se je AFK. Lëviz raundin e ardhshëm, përndryshe do të kalosh në spektator.",
-  "retakes.afk.moved": "U kalove në spektator sepse ishe AFK. Zgjidh një ekip për t'u kthyer në radhë."
+  "retakes.afk.moved": "U kalove në spektator sepse ishe AFK. Zgjidh një ekip për t'u kthyer në radhë.",
+  "retakes.queue.waiting_for_players": "Në pritje të lojtarëve: {green}{0}{default}/{green}{1}{default}. Loja fillon sapo të bashkohen mjaftueshëm lojtarë.",
+  "retakes.queue.minimum_players_reached": "U bashkuan mjaftueshëm lojtarë - loja po fillon!"
 }

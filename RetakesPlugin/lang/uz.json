@@ -58,5 +58,7 @@
   "retakes.queue.not_queued": "Siz navbatda emassiz. Qo‘shilish uchun jamoani tanlang.",
   "retakes.queue.next": "Joy bo‘shadi - keyingi raundda o‘yinga kirasiz!",
   "retakes.afk.warning": "Siz AFK ko‘rinasiz. Keyingi raundda harakat qiling, aks holda tomoshabinga o‘tkazilasiz.",
-  "retakes.afk.moved": "AFK bo‘lganingiz uchun tomoshabinga o‘tkazildingiz. Navbatga qaytish uchun jamoani tanlang."
+  "retakes.afk.moved": "AFK bo‘lganingiz uchun tomoshabinga o‘tkazildingiz. Navbatga qaytish uchun jamoani tanlang.",
+  "retakes.queue.waiting_for_players": "O'yinchilar kutilmoqda: {green}{0}{default}/{green}{1}{default}. Yetarli o'yinchi qo'shilganda o'yin boshlanadi.",
+  "retakes.queue.minimum_players_reached": "Yetarli o'yinchi qo'shildi - o'yin boshlanmoqda!"
 }

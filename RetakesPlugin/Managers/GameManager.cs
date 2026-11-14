@@ -22,11 +22,14 @@ public class GameManager
     public const int ScoreForAssist = 25;
     public const int ScoreForDefuse = 50;
 
-    public GameManager(RetakesPlugin plugin, QueueManager queueManager, int? roundsToScramble, bool? isScrambleEnabled, bool? removeSpectatorsEnabled, bool? isBalanceEnabled, int? afkRoundsToSpectator)
+    public GameManager(RetakesPlugin plugin, QueueManager queueManager, int? roundsToScramble, bool? isScrambleEnabled, bool? removeSpectatorsEnabled, bool? isBalanceEnabled, int? afkRoundsToSpectator, int? minimumPlayers)
     {
         _plugin = plugin;
         QueueManager = queueManager;
         AfkManager = new AfkManager(plugin, afkRoundsToSpectator);
+
+        // Clamp so a misconfigured value can never leave the server waiting forever.
+        _minimumPlayers = Math.Clamp(minimumPlayers ?? 0, 0, queueManager.MaxRetakesPlayers);
         _consecutiveRoundWinsToScramble = roundsToScramble ?? 5;
         _isScrambleEnabled = isScrambleEnabled ?? true;
         _removeSpectatorsEnabled = removeSpectatorsEnabled ?? false;
@@ -34,6 +37,84 @@ public class GameManager
 
         Logger.LogInfo("GameManager", "Game manager initialized");
     }
+
+    #region Minimum players
+    // Ported from upstream B3none/cs2-retakes 3.1.0 (MinimumPlayers).
+    private readonly int _minimumPlayers;
+    private const float WaitingAnnounceCooldownSeconds = 10.0f;
+    private float _lastWaitingAnnounceTime = -WaitingAnnounceCooldownSeconds;
+
+    public bool IsWaitingForPlayers { get; private set; }
+
+    public bool ShouldWaitForPlayers()
+    {
+        return _minimumPlayers > 0 && QueueManager.GetHumanPlayerCount() < _minimumPlayers;
+    }
+
+    public void StartWaitingForPlayers()
+    {
+        var alreadyWaiting = IsWaitingForPlayers;
+
+        // Always re-assert the paused warmup so the hold recovers from an unexpected round
+        // restart while already waiting.
+        IsWaitingForPlayers = true;
+        Server.ExecuteCommand("mp_warmup_start");
+        Server.ExecuteCommand("mp_warmup_pausetimer 1");
+
+        if (!alreadyWaiting)
+        {
+            AnnounceWaitingForPlayers();
+            Logger.LogInfo("GameManager", $"Waiting for players ({QueueManager.GetHumanPlayerCount()}/{_minimumPlayers})");
+        }
+    }
+
+    public void CancelWaitingForPlayers()
+    {
+        if (!IsWaitingForPlayers)
+        {
+            return;
+        }
+
+        IsWaitingForPlayers = false;
+        Server.ExecuteCommand("mp_warmup_pausetimer 0");
+        Logger.LogInfo("GameManager", "Waiting for players cancelled");
+    }
+
+    // Called after every jointeam: releases the hold once enough players have joined.
+    public void CheckMinimumPlayers()
+    {
+        if (!IsWaitingForPlayers)
+        {
+            return;
+        }
+
+        if (ShouldWaitForPlayers())
+        {
+            AnnounceWaitingForPlayers();
+            return;
+        }
+
+        IsWaitingForPlayers = false;
+        Server.ExecuteCommand("mp_warmup_pausetimer 0");
+        Server.ExecuteCommand("mp_warmup_end");
+
+        _plugin.PrintToChatAllLocalized("retakes.queue.minimum_players_reached");
+        Logger.LogInfo("GameManager", "Minimum players reached, starting the game");
+    }
+
+    private void AnnounceWaitingForPlayers()
+    {
+        // Purely time based, so join/leave flapping cannot flood the chat.
+        var timeSinceLastAnnounce = Server.CurrentTime - _lastWaitingAnnounceTime;
+        if (timeSinceLastAnnounce >= 0 && timeSinceLastAnnounce < WaitingAnnounceCooldownSeconds)
+        {
+            return;
+        }
+
+        _lastWaitingAnnounceTime = Server.CurrentTime;
+        _plugin.PrintToChatAllLocalized("retakes.queue.waiting_for_players", QueueManager.GetHumanPlayerCount(), _minimumPlayers);
+    }
+    #endregion
 
     // How long to collect joiners before the first round starts on an empty server.
     private const float RestartGameDelaySeconds = 5.0f;
@@ -47,6 +128,12 @@ public class GameManager
     // out of the jointeam hook (upstream issue #186).
     public void RestartGameIfEmpty()
     {
+        // Parked in a paused warmup for MinimumPlayers; CheckMinimumPlayers starts the game.
+        if (IsWaitingForPlayers)
+        {
+            return;
+        }
+
         if (QueueManager.ActivePlayerCount != 0)
         {
             return;

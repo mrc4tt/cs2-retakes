@@ -58,5 +58,7 @@
   "retakes.queue.not_queued": "Du är inte i kön. Välj ett lag för att gå med.",
   "retakes.queue.next": "En plats har blivit ledig - du är med nästa runda!",
   "retakes.afk.warning": "Det verkar som att du är AFK. Rör på dig nästa runda, annars flyttas du till åskådare.",
-  "retakes.afk.moved": "Du flyttades till åskådare för att du var AFK. Välj ett lag för att ställa dig i kön igen."
+  "retakes.afk.moved": "Du flyttades till åskådare för att du var AFK. Välj ett lag för att ställa dig i kön igen.",
+  "retakes.queue.waiting_for_players": "Väntar på spelare: {green}{0}{default}/{green}{1}{default}. Spelet startar när tillräckligt många spelare har anslutit.",
+  "retakes.queue.minimum_players_reached": "Tillräckligt många spelare har anslutit - spelet startar!"
 }

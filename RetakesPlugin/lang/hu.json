@@ -58,5 +58,7 @@
   "retakes.queue.not_queued": "Nem vagy a várólistán. Válassz csapatot a csatlakozáshoz.",
   "retakes.queue.next": "Felszabadult egy hely - a következő körben bekerülsz!",
   "retakes.afk.warning": "Úgy tűnik, AFK vagy. Mozdulj meg a következő körben, különben nézőbe kerülsz.",
-  "retakes.afk.moved": "AFK miatt nézőbe lettél helyezve. Válassz csapatot, hogy újra a várólistára kerülj."
+  "retakes.afk.moved": "AFK miatt nézőbe lettél helyezve. Válassz csapatot, hogy újra a várólistára kerülj.",
+  "retakes.queue.waiting_for_players": "Várakozás játékosokra: {green}{0}{default}/{green}{1}{default}. A játék elindul, amint elegen csatlakoztak.",
+  "retakes.queue.minimum_players_reached": "Elegendő játékos csatlakozott - a játék indul!"
 }

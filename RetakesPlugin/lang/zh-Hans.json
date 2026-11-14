@@ -58,5 +58,7 @@
   "retakes.queue.not_queued": "您不在队列中。请选择一个队伍加入。",
   "retakes.queue.next": "有空位了 - 您将在下一回合加入游戏！",
   "retakes.afk.warning": "您似乎处于挂机状态。下一回合请移动，否则将被移至观察者。",
-  "retakes.afk.moved": "您因挂机被移至观察者。请选择一个队伍重新加入队列。"
+  "retakes.afk.moved": "您因挂机被移至观察者。请选择一个队伍重新加入队列。",
+  "retakes.queue.waiting_for_players": "等待玩家中：{green}{0}{default}/{green}{1}{default}。人数足够后游戏将开始。",
+  "retakes.queue.minimum_players_reached": "人数已足够，游戏即将开始！"
 }

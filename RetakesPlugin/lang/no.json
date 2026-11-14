@@ -58,5 +58,7 @@
   "retakes.queue.not_queued": "Du er ikke i køen. Velg et lag for å bli med.",
   "retakes.queue.next": "En plass har blitt ledig - du blir med neste runde!",
   "retakes.afk.warning": "Det ser ut som du er AFK. Beveg deg neste runde, ellers blir du flyttet til tilskuer.",
-  "retakes.afk.moved": "Du ble flyttet til tilskuer for å være AFK. Velg et lag for å komme i køen igjen."
+  "retakes.afk.moved": "Du ble flyttet til tilskuer for å være AFK. Velg et lag for å komme i køen igjen.",
+  "retakes.queue.waiting_for_players": "Venter på spillere: {green}{0}{default}/{green}{1}{default}. Spillet starter når det er nok spillere.",
+  "retakes.queue.minimum_players_reached": "Det er nå nok spillere - spillet starter!"
 }

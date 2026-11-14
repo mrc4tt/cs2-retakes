@@ -257,6 +257,10 @@ public class RetakesPlugin : BasePlugin, IPluginConfig<BaseConfigs>
     {
         try
         {
+            // The game manager being replaced may hold the server in a paused warmup
+            // (MinimumPlayers); release it or the new one would never start the game.
+            _gameManager?.CancelWaitingForPlayers();
+
             // Initialize MapConfigService
             _mapConfigService = new MapConfigService(ModuleDirectory, customMapConfig ?? mapName, _jsonOptions);
             _mapConfigService.Load();
@@ -280,7 +284,8 @@ public class RetakesPlugin : BasePlugin, IPluginConfig<BaseConfigs>
                 Config.Team.IsScrambleEnabled,
                 Config.Queue.ShouldRemoveSpectators,
                 Config.Team.IsBalanceEnabled,
-                Config.Queue.AfkRoundsToSpectator
+                Config.Queue.AfkRoundsToSpectator,
+                Config.Game.MinimumPlayers
             );
 
             _breakerManager = new BreakerManager(
@@ -480,6 +485,7 @@ public class RetakesPlugin : BasePlugin, IPluginConfig<BaseConfigs>
         var response = _gameManager.QueueManager.PlayerJoinedTeam(player, fromTeam, toTeam);
         _gameManager.QueueManager.DebugQueues(false);
 
+        _gameManager.CheckMinimumPlayers();
         _gameManager.RestartGameIfEmpty();
 
         return response;
@@ -489,6 +495,10 @@ public class RetakesPlugin : BasePlugin, IPluginConfig<BaseConfigs>
     public override void Unload(bool hotReload)
     {
         Utils.Logger.LogInfo("Main", "Plugin unloading...");
+
+        // Never leave the server stuck in a paused warmup after the plugin is gone.
+        _gameManager?.CancelWaitingForPlayers();
+
         base.Unload(hotReload);
     }
 }

@@ -72,6 +72,7 @@ When the plugin is first loaded it will create `addons/counterstrikesharp/config
 | Config                    | Description                                                                                                                             | Default | Min   | Max   |
 |---------------------------|-----------------------------------------------------------------------------------------------------------------------------------------|---------|-------|-------|
 | MaxPlayers                | The maximum number of players allowed in the game at any time. (If you want to increase the max capability you need to add more spawns) | 9       | 2     | 10    |
+| MinimumPlayers            | Hold the server in a paused warmup until this many human players (active or queued) have joined, so retakes don't start as 1v0. 0 disables it; capped at MaxPlayers. | 0       | 0     | MaxPlayers |
 | ShouldBreakBreakables     | Whether to break all breakable props on round start (People are noticing rare crashes when this is enabled).                            | false   | false | true  |
 | ShouldOpenDoors           | Whether to open doors on round start (People are noticing rare crashes when this is enabled).                                           | false   | false | true  |
 | EnableFallbackAllocation  | Whether to enable the fallback weapon allocation. Leave this false if you're using a standalone weapon allocator; set it to true only if you want this plugin to allocate weapons itself. | false   | false | true  |

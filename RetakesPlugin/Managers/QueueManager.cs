@@ -158,6 +158,17 @@ public class QueueManager
 
     #endregion
 
+    public int MaxRetakesPlayers => _maxRetakesPlayers;
+
+    // Humans who want to play: active and queued. Queued players count too, otherwise bots in
+    // the active slots could keep a MinimumPlayers hold from ever releasing.
+    public int GetHumanPlayerCount()
+    {
+        return ActivePlayers.Count(IsHuman) + QueuePlayers.Count(IsHuman);
+    }
+
+    private static bool IsHuman(CCSPlayerController player) => !player.IsBot && !player.IsHLTV;
+
     public int GetTargetNumTerrorists()
     {
         var activePlayerCount = ActivePlayerCount;

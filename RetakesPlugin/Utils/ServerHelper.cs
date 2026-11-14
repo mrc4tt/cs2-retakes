@@ -1,4 +1,5 @@
 using System.Text;
+using System.Text.RegularExpressions;
 using CounterStrikeSharp.API;
 
 namespace RetakesPlugin.Utils;
@@ -14,9 +15,41 @@ public static class ServerHelper
         {
             CreateRetakesConfig();
         }
+        else
+        {
+            MigrateRetakesConfig();
+        }
 
         Server.ExecuteCommand("exec cs2-retakes/retakes.cfg");
         Logger.LogInfo("Server", "Retakes configuration executed");
+    }
+
+    // retakes.cfg is only written when it is missing, so a fix to the shipped defaults never
+    // reaches a server that already has one. The old default mp_roundtime_defuse 0.25 (15 seconds)
+    // makes CS2 play the "10 seconds remaining" warning right after every round starts. Only that
+    // exact old default is migrated; a value the server owner picked is left alone.
+    // (Ported from upstream B3none/cs2-retakes 3.1.0.)
+    private static void MigrateRetakesConfig()
+    {
+        try
+        {
+            var contents = File.ReadAllText(RetakesCfgPath);
+
+            var migrated = Regex.Replace(
+                contents,
+                @"(?m)^([ \t]*)mp_roundtime_defuse[ \t]+0\.25[ \t]*(\r?)$",
+                "${1}mp_roundtime_defuse 1.25${2}");
+
+            if (migrated != contents)
+            {
+                File.WriteAllText(RetakesCfgPath, migrated);
+                Logger.LogInfo("Server", "Migrated mp_roundtime_defuse 0.25 -> 1.25 in retakes.cfg (fixes the 10 second warning at round start)");
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.LogException("Server", ex);
+        }
     }
 
     private static void CreateRetakesConfig()
@@ -48,7 +81,7 @@ public static class ServerHelper
                 sv_skirmish_id 0
 
                 // Things you can change, and may want to:
-                mp_roundtime_defuse 0.25
+                mp_roundtime_defuse 1.25
                 mp_autokick 0
                 mp_c4timer 40
                 mp_freezetime 1

@@ -95,6 +95,18 @@ public class RoundEventHandlers
         _gameManager.QueueManager.Update();
         _gameManager.QueueManager.DebugQueues(false);
 
+        // MinimumPlayers: park the server in a paused warmup until enough humans have joined.
+        // Queued players were seated by the update above, so they play in the warmup meanwhile.
+        if (_gameManager.ShouldWaitForPlayers())
+        {
+            Logger.LogInfo("Round", "Not enough players to start a retake, waiting for players");
+            _gameManager.StartWaitingForPlayers();
+            return HookResult.Continue;
+        }
+
+        // Heal a stale waiting state, e.g. an admin ran mp_warmup_end by hand.
+        _gameManager.CancelWaitingForPlayers();
+
         _gameManager.OnRoundPreStart(_lastRoundWinner);
         _gameManager.QueueManager.SetRoundTeams();
 
@@ -150,6 +162,12 @@ public class RoundEventHandlers
             return HookResult.Continue;
         }
 
+        if (_gameManager.IsWaitingForPlayers)
+        {
+            Logger.LogDebug("Round", "Waiting for players, skipping round start logic");
+            return HookResult.Continue;
+        }
+
         if (_spawnManager == null)
         {
             Logger.LogDebug("Round", "Spawn manager not loaded.");
@@ -186,6 +204,12 @@ public class RoundEventHandlers
         if (gameRules.WarmupPeriod)
         {
             Logger.LogDebug("Round", "Warmup round, skipping post-start logic");
+            return HookResult.Continue;
+        }
+
+        if (_gameManager.IsWaitingForPlayers)
+        {
+            Logger.LogDebug("Round", "Waiting for players, skipping post-start logic");
             return HookResult.Continue;
         }
 
@@ -233,6 +257,12 @@ public class RoundEventHandlers
         if (gameRules.WarmupPeriod)
         {
             Logger.LogDebug("Round", "Warmup round, skipping freeze end logic");
+            return HookResult.Continue;
+        }
+
+        if (_gameManager.IsWaitingForPlayers)
+        {
+            Logger.LogDebug("Round", "Waiting for players, skipping freeze end logic");
             return HookResult.Continue;
         }
 

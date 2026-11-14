@@ -58,5 +58,7 @@
   "retakes.queue.not_queued": "Você não está na fila. Escolha um time para entrar.",
   "retakes.queue.next": "Uma vaga foi liberada - você entra na próxima rodada!",
   "retakes.afk.warning": "Parece que você está AFK. Mova-se na próxima rodada ou será movido para espectador.",
-  "retakes.afk.moved": "Você foi movido para espectador por estar AFK. Escolha um time para voltar à fila."
+  "retakes.afk.moved": "Você foi movido para espectador por estar AFK. Escolha um time para voltar à fila.",
+  "retakes.queue.waiting_for_players": "Aguardando jogadores: {green}{0}{default}/{green}{1}{default}. O jogo começará quando houver jogadores suficientes.",
+  "retakes.queue.minimum_players_reached": "Jogadores suficientes entraram - o jogo está começando!"
 }

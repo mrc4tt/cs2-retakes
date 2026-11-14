@@ -11,6 +11,8 @@
 - AFK players are moved to spectator after `AfkRoundsToSpectator` rounds (default 3, 0 = off) without moving or aiming, with a warning one round before; the queue fills their slot.
 - New `!queue` command shows your position in the waiting queue; the first in line is told when a slot opens.
 - Removed the hardcoded upstream contributor steam IDs that were granted `@css/vip` (queue priority) on every server.
+- Round timer no longer shows the "10 seconds remaining" warning right after every round starts: default `mp_roundtime_defuse` is 1.25, and existing `retakes.cfg` files with the old 0.25 default are migrated automatically (ported from upstream 3.1.0).
+- New `Game.MinimumPlayers` (default 0 = off): the server waits in a paused warmup until enough players have joined, then starts the game (ported from upstream 3.1.0).
 
 ## 3.0.6
 - Spawns edited or added in game (spawn editor) are saved to `addons/counterstrikesharp/configs/plugins/RetakesPlugin/map_config/<map>.json` and survive plugin updates.

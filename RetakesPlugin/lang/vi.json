@@ -58,5 +58,7 @@
   "retakes.queue.not_queued": "Bạn không ở trong hàng chờ. Hãy chọn một đội để tham gia.",
   "retakes.queue.next": "Đã có chỗ trống - bạn sẽ vào chơi ở vòng sau!",
   "retakes.afk.warning": "Có vẻ bạn đang AFK. Hãy di chuyển ở vòng sau, nếu không bạn sẽ bị chuyển sang khán giả.",
-  "retakes.afk.moved": "Bạn đã bị chuyển sang khán giả vì AFK. Hãy chọn một đội để vào lại hàng chờ."
+  "retakes.afk.moved": "Bạn đã bị chuyển sang khán giả vì AFK. Hãy chọn một đội để vào lại hàng chờ.",
+  "retakes.queue.waiting_for_players": "Đang chờ người chơi: {green}{0}{default}/{green}{1}{default}. Trò chơi sẽ bắt đầu khi có đủ người chơi.",
+  "retakes.queue.minimum_players_reached": "Đã có đủ người chơi - trò chơi đang bắt đầu!"
 }

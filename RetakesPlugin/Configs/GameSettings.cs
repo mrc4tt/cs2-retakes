@@ -7,6 +7,11 @@ public class GameSettings
     [JsonPropertyName("MaxPlayers")]
     public int MaxPlayers { get; set; } = 9;
 
+    // Hold the server in a paused warmup until this many human players (active or queued) have
+    // joined, so retakes do not start as 1v0. 0 disables it; capped at MaxPlayers.
+    [JsonPropertyName("MinimumPlayers")]
+    public int MinimumPlayers { get; set; } = 0;
+
     [JsonPropertyName("ShouldBreakBreakables")]
     public bool ShouldBreakBreakables { get; set; } = false;
 

@@ -58,5 +58,7 @@
   "retakes.queue.not_queued": "Vous n'êtes pas dans la file d'attente. Choisissez une équipe pour rejoindre.",
   "retakes.queue.next": "Une place s'est libérée - vous jouez au prochain round !",
   "retakes.afk.warning": "Vous semblez AFK. Bougez au prochain round, sinon vous serez déplacé en spectateur.",
-  "retakes.afk.moved": "Vous avez été déplacé en spectateur pour AFK. Choisissez une équipe pour revenir dans la file."
+  "retakes.afk.moved": "Vous avez été déplacé en spectateur pour AFK. Choisissez une équipe pour revenir dans la file.",
+  "retakes.queue.waiting_for_players": "En attente de joueurs : {green}{0}{default}/{green}{1}{default}. La partie commencera lorsqu'il y aura assez de joueurs.",
+  "retakes.queue.minimum_players_reached": "Assez de joueurs ont rejoint - la partie commence !"
 }
