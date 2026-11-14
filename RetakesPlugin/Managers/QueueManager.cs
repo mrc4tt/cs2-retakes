@@ -134,6 +134,30 @@ public class QueueManager
         return index < 0 ? null : (index + 1, ordered.Count);
     }
 
+    // ShouldAutoJoinGame: seats a player who just connected as if they had picked a team.
+    // Active (warmup with a free slot) -> onto CT now; otherwise queued and kept in spectator
+    // until the next queue update gives them a slot.
+    public void AddConnectingPlayer(CCSPlayerController player)
+    {
+        if (!PlayerHelper.IsValid(player) || player.IsBot || player.IsHLTV || IsActive(player) || IsQueued(player))
+        {
+            return;
+        }
+
+        PlayerJoinedTeam(player, CsTeam.Spectator, CsTeam.CounterTerrorist);
+
+        if (IsActive(player))
+        {
+            PlayerHelper.TryChangeTeam(player, CsTeam.CounterTerrorist);
+            Logger.LogInfo("QueueManager", $"Auto joined {player.PlayerName} into the game");
+        }
+        else if (IsQueued(player))
+        {
+            PlayerHelper.TryChangeTeam(player, CsTeam.Spectator);
+            Logger.LogInfo("QueueManager", $"Auto joined {player.PlayerName} into the queue");
+        }
+    }
+
     // Takes an active player out of the game without putting them in the queue (AFK handling).
     // They rejoin the queue the normal way, by picking a team.
     public bool MoveActiveToSpectator(CCSPlayerController player)
@@ -249,7 +273,9 @@ public class QueueManager
             // Players explicitly choosing to spectate should not be tracked as wanting to play.
             // Without this, jointeam 1 while already spectating adds the player to the queue,
             // and the next queue update yanks them into a team mid-restart.
-            if (toTeam != CsTeam.Terrorist && toTeam != CsTeam.CounterTerrorist)
+            // CsTeam.None is the team menu's auto-select button and means "put me in", so only
+            // an explicit spectate is left untracked. (Ported from upstream B3none/cs2-retakes.)
+            if (toTeam == CsTeam.Spectator)
             {
                 return HookResult.Continue;
             }

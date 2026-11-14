@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.0.9
+- New `Queue.ShouldAutoJoinGame` (default false): connecting players are put straight into the game, or the queue when it is full, without the team menu (ported from upstream 3.1.0).
+- The team menu's auto-select button now joins the queue like picking T or CT; before, it was ignored and the player was left out (ported from upstream 3.1.1).
+
 ## 3.0.8
 - New `retakes_enabled` convar: `0` turns retakes off on the fly (clears the queues and restores the server's convars), `1` turns it back on and restarts with the players already on a team (ported from upstream 3.1.0).
 - New `cfg/cs2-retakes/retakes_unload.cfg`, executed on `retakes_enabled 0` and on `css_plugins unload`, restores the convars `retakes.cfg` changes. It is created on first map start so it can be adjusted up front; its `bot_quota` is 0 so leaving retakes adds no bots.

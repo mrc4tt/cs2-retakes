@@ -83,6 +83,7 @@ When the plugin is first loaded it will create `addons/counterstrikesharp/config
 | QueuePriorityFlag      | A list of priority flag configurations. Each entry contains DisplayName, Flag, and Priority. Players with higher priority can replace players with lower priority in the queue. | `[{"DisplayName": "VIP", "Flag": "@css/vip", "Priority": 0}]` | 0 | 100 |
 | QueueImmunityFlag      | A list of immunity flag configurations. Each entry contains DisplayName, Flag, and Priority. Players with immunity priority cannot be replaced by players with equal or lower priority. | `[{"DisplayName": "VIP", "Flag": "@css/vip", "Priority": 0}]` | 0 | 100 |
 | ShouldRemoveSpectators | When a player is moved to spectators, remove them from all retake queues. Ensures that AFK plugins work as expected. | true     | false | true |
+| ShouldAutoJoinGame     | Put connecting players straight into the game (or the queue when it is full) instead of showing the team menu. Takes precedence over ShouldAutoJoinSpectators. | false | false | true |
 | AfkRoundsToSpectator   | Active players who stay AFK (no movement or aiming) this many rounds in a row are moved to spectator so the queue can take their slot. They are warned one round before. 0 disables it. | 3 | 0 | - |
 
 **QueuePriorityFlag and QueueImmunityFlag Configuration:**

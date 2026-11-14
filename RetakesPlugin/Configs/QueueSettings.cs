@@ -22,6 +22,11 @@ public class QueueSettings
     [JsonPropertyName("ShouldAutoJoinSpectators")]
     public bool ShouldAutoJoinSpectators { get; set; } = true;
 
+    // Put connecting players straight into the game (or the queue when it is full) instead of
+    // showing the team menu. Takes precedence over ShouldAutoJoinSpectators.
+    [JsonPropertyName("ShouldAutoJoinGame")]
+    public bool ShouldAutoJoinGame { get; set; } = false;
+
     // Active players who stay AFK this many rounds in a row are moved to spectator so the queue
     // can take their slot. 0 disables AFK handling.
     [JsonPropertyName("AfkRoundsToSpectator")]

@@ -30,7 +30,10 @@ public class PlayerEventHandlers
 
         player.ForceTeamTime = 3600.0f;
 
-        if(_plugin.Config.Queue.ShouldAutoJoinSpectators && PlayerHelper.TryGetUserId(player, out var connectedUserId))
+        var autoJoinGame = _plugin.Config.Queue.ShouldAutoJoinGame;
+        var autoJoinSpectators = _plugin.Config.Queue.ShouldAutoJoinSpectators;
+
+        if ((autoJoinGame || autoJoinSpectators) && PlayerHelper.TryGetUserId(player, out var connectedUserId))
         {
             _plugin.AddTimer(1.0f, () =>
             {
@@ -50,14 +53,24 @@ public class PlayerEventHandlers
                 // player who has not chosen a side and is not already tracked by the queue.
                 if (player.Team == CsTeam.Terrorist || player.Team == CsTeam.CounterTerrorist)
                 {
-                    Logger.LogDebug("Player", $"[{player.PlayerName}] Already picked a team, skipping auto-spectate");
+                    Logger.LogDebug("Player", $"[{player.PlayerName}] Already picked a team, skipping auto-join");
                     return;
                 }
 
                 if (_gameManager.QueueManager.IsActive(player) ||
                     _gameManager.QueueManager.IsQueued(player))
                 {
-                    Logger.LogDebug("Player", $"[{player.PlayerName}] Already queued, skipping auto-spectate");
+                    Logger.LogDebug("Player", $"[{player.PlayerName}] Already queued, skipping auto-join");
+                    return;
+                }
+
+                // ShouldAutoJoinGame: straight into the game/queue, no team menu.
+                // (Ported from upstream B3none/cs2-retakes 3.1.0.)
+                if (autoJoinGame)
+                {
+                    _gameManager.QueueManager.AddConnectingPlayer(player);
+                    _gameManager.CheckMinimumPlayers();
+                    _gameManager.RestartGameIfEmpty();
                     return;
                 }
 
